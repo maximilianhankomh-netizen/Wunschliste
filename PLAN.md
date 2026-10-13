@@ -22,10 +22,10 @@ Anforderungen:
 |---|---|---|
 | Art der Seite | Statische Website (HTML, CSS, JavaScript) | Kein Server, keine Datenbank, nichts kann „kaputtgehen“ |
 | Build-Tools | Keine (kein npm, kein Framework) | Einfach zu verstehen und zu pflegen |
-| Datenhaltung | Eine Datei `wuensche.json` | Alle Wünsche an einer Stelle, direkt im GitHub-Webeditor bearbeitbar |
+| Datenhaltung | Eine Datei `wuensche.js` | Alle Wünsche an einer Stelle, direkt im GitHub-Webeditor bearbeitbar. Als `.js` statt `.json`, damit Kommentare möglich sind und `index.html` auch per Doppelklick ohne Server funktioniert |
 | Bilder | Eigener Ordner `bilder/` im Repo | Shop-Bilder (v. a. Amazon) nicht direkt verlinken – die Links brechen oft |
 | Hosting | GitHub Pages | Kostenlos, automatisch aktualisiert bei jedem Commit |
-| Suchmaschinen | `<meta name="robots" content="noindex">` + `robots.txt` | Seite taucht nicht bei Google auf |
+| Suchmaschinen | `<meta name="robots" content="noindex">` | Seite taucht nicht bei Google auf (eine `robots.txt` wirkt bei GitHub-Pages-Projektseiten nicht, weil sie nicht im Wurzelverzeichnis der Domain liegt) |
 
 > **Hinweis zu GitHub Pages:** Bei einem kostenlosen GitHub-Konto muss das Repository dafür
 > **öffentlich** sein. Da die Wunschliste ohnehin geteilt wird, ist das meist kein Problem –
@@ -35,6 +35,8 @@ Anforderungen:
 ---
 
 ## Datenmodell (ein Wunsch)
+
+Umgesetzt in `wuensche.js` (gleiche Felder, Schreibweise als JavaScript-Objekt).
 
 ```json
 {
@@ -111,11 +113,12 @@ Die allgemeinen **Größenangaben** sind praktisch, damit Schenkende bei Kleidun
 Wunschliste/
 ├── index.html        # Seitengerüst
 ├── style.css         # Design (Mobile-first, heller/dunkler Modus)
-├── app.js            # Lädt wuensche.json und baut die Karten, Filter, Sortierung
-├── wuensche.json     # ← hier werden die Wünsche gepflegt
+├── app.js            # Liest wuensche.js und baut die Karten, Filter, Sortierung
+├── wuensche.js       # ← hier werden die Wünsche gepflegt
 ├── bilder/           # Produktbilder
-├── vorschau.jpg      # Bild für die Link-Vorschau (WhatsApp, Signal, …)
-├── robots.txt        # Suchmaschinen aussperren
+├── vorschau.png      # Bild für die Link-Vorschau (WhatsApp, Signal, …)
+├── favicon.svg       # Symbol im Browser-Tab
+├── schriften/        # Schriftarten, lokal eingebunden
 └── README.md         # Anleitung: Wunsch hinzufügen, Bild hochladen
 ```
 
@@ -124,23 +127,24 @@ Wunschliste/
 ## Umsetzung in Phasen
 
 ### Phase 1 – Grundgerüst (MVP)
-- [ ] `wuensche.json` mit Einstellungen und 2–3 Beispielwünschen anlegen
-- [ ] `index.html`, `style.css`, `app.js`: Wünsche laden und als Karten anzeigen
-- [ ] Links öffnen in neuem Tab (`target="_blank" rel="noopener"`)
-- [ ] Amazon-Wunschlisten-Button im Kopfbereich
-- [ ] `noindex` + `robots.txt`
+- [x] `wuensche.js` mit Einstellungen und Beispielwünschen anlegen
+- [x] `index.html`, `style.css`, `app.js`: Wünsche laden und als Karten anzeigen
+- [x] Links öffnen in neuem Tab (`target="_blank" rel="noopener"`)
+- [x] Amazon-Wunschlisten-Button im Kopfbereich
+- [x] `noindex`
+- [x] Verständliche Fehlermeldung mit Zeilennummer bei Tippfehlern in `wuensche.js`
 
 ### Phase 2 – Komfort & Design
-- [ ] Filter nach Kategorie und Preisbereich, Sortierung nach Priorität/Preis
-- [ ] Ansprechendes, responsives Design inkl. Dunkelmodus
-- [ ] Link-Vorschau (Open-Graph-Tags: Titel, Beschreibung, Vorschaubild)
-- [ ] Direktlinks zu einzelnen Wünschen (`…/#kopfhoerer`)
-- [ ] Erfüllte Wünsche ausblenden oder als „schon erfüllt“ markieren
+- [x] Filter nach Kategorie und Preisbereich, Sortierung nach Priorität/Preis
+- [x] Ansprechendes, responsives Design inkl. Dunkelmodus
+- [x] Link-Vorschau (Open-Graph-Tags: Titel, Beschreibung, Vorschaubild)
+- [x] Direktlinks zu einzelnen Wünschen (`…/#kopfhoerer`) mit Kopier-Knopf
+- [x] Erfüllte Wünsche ausblenden und unten unter „Schon erfüllt“ auflisten
 
 ### Phase 3 – Veröffentlichen
 - [ ] GitHub Pages aktivieren (Settings → Pages → Branch `main`, Ordner `/`)
 - [ ] Seite auf Handy und Desktop testen, Link-Vorschau in WhatsApp prüfen
-- [ ] README mit Schritt-für-Schritt-Anleitung „Neuen Wunsch hinzufügen“
+- [x] README mit Schritt-für-Schritt-Anleitung „Neuen Wunsch hinzufügen“
 
 ### Phase 4 – Optional
 - [ ] **Bearbeitungsoberfläche** statt JSON von Hand: z. B. [Pages CMS](https://pagescms.org)

@@ -1,0 +1,137 @@
+// =====================================================================
+//  MEINE WUNSCHLISTE
+//  In dieser Datei stehen alle Inhalte der Seite. Nur hier musst du
+//  etwas ändern, wenn du Wünsche hinzufügen, ändern oder löschen willst.
+// =====================================================================
+//
+//  So fügst du einen neuen Wunsch hinzu:
+//    1. Kopiere einen kompletten Wunsch-Block: von der Zeile mit  {
+//       bis zur Zeile mit  },  (das Komma gehört dazu).
+//    2. Füge ihn in der Liste "wuensche" ein (z. B. direkt unter "wuensche: [").
+//    3. Ändere die Werte. Felder, die du nicht brauchst, löschst du einfach.
+//
+//  Damit nichts kaputtgeht:
+//    - Texte stehen immer zwischen "geraden Anführungszeichen".
+//    - Brauchst du im Text selbst Anführungszeichen, nimm „deutsche“.
+//    - Nach jedem Eintrag steht ein Komma.
+//    - Zeilen, die mit // beginnen, sind Kommentare und werden ignoriert.
+//    - Zeigt die Seite eine Fehlermeldung, fehlt meistens ein Komma oder
+//      ein Anführungszeichen in der Zeile, die du zuletzt geändert hast.
+//
+//  Alle Felder eines Wunsches:
+//    titel         Name des Wunsches (Pflicht)
+//    beschreibung  Kurz: was genau und warum
+//    kategorie     z. B. "Technik", "Bücher", "Kleidung", "Erlebnisse"
+//    prioritaet    1 = Herzenswunsch, 2 = würde mich freuen, 3 = Kleinigkeit
+//    preis         Ungefährer Preis in Euro, nur die Zahl (z. B. 24.99)
+//    details       Zusatzinfos wie Größe, Farbe, Modell, ISBN …
+//    bild          Pfad zu einem Bild im Ordner "bilder", z. B. "bilder/jacke.jpg"
+//    links         Ein oder mehrere Links zu Shops (Amazon, Hersteller …)
+//    hinweis       Persönliche Notiz, z. B. „Gebraucht ist auch okay“
+//    erfuellt      true = schon geschenkt bekommen (rutscht nach unten)
+//    id            Optional: Kurzname für Direktlinks (…/#kopfhoerer).
+//                  Fehlt er, wird er automatisch aus dem Titel gebildet.
+// =====================================================================
+
+window.WUNSCHLISTE = {
+  einstellungen: {
+    titel: "Meine Wunschliste",
+    einleitung:
+      "Schön, dass du vorbeischaust! Hier steht alles, worüber ich mich gerade freuen würde. " +
+      "Die Preise sind ungefähre Richtwerte. Wenn du unsicher bist, frag mich einfach.",
+
+    // Link zu deiner Amazon-Wunschliste. Leer lassen (""), dann wird der Knopf ausgeblendet.
+    // Wichtig: Die Liste muss bei Amazon auf „Geteilt“ oder „Öffentlich“ stehen.
+    amazonWunschliste: "",
+
+    // Größen, damit niemand raten muss. Einträge löschen oder ergänzen, wie du magst.
+    groessen: {
+      "T-Shirt / Pullover": "M",
+      "Hose": "W32 / L32",
+      "Schuhe": "EU 43",
+    },
+
+    // Text ganz unten auf der Seite.
+    fusszeile:
+      "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. " +
+      "Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
+  },
+
+  wuensche: [
+    // ---- Die folgenden Wünsche sind BEISPIELE. Ersetze sie durch deine eigenen. ----
+    {
+      titel: "Kopfhörer mit Noise Cancelling",
+      beschreibung: "Over-Ear-Kopfhörer für Bahnfahrten und konzentriertes Arbeiten.",
+      kategorie: "Technik",
+      prioritaet: 1,
+      preis: 299,
+      details: {
+        "Modell": "Sony WH-1000XM5",
+        "Farbe": "Schwarz oder Silber",
+      },
+      links: [
+        { name: "Amazon", url: "https://www.amazon.de/s?k=Sony+WH-1000XM5" },
+        { name: "Hersteller", url: "https://www.sony.de/" },
+      ],
+      hinweis: "Refurbished oder B-Ware ist völlig okay!",
+    },
+    {
+      titel: "Der Astronaut",
+      beschreibung: "Science-Fiction-Roman von Andy Weir, vom Autor von „Der Marsianer“.",
+      kategorie: "Bücher",
+      prioritaet: 2,
+      preis: 14,
+      details: {
+        "Autor": "Andy Weir",
+        "Format": "Taschenbuch, Deutsch",
+      },
+      links: [
+        { name: "Amazon", url: "https://www.amazon.de/s?k=Der+Astronaut+Andy+Weir" },
+        { name: "Thalia", url: "https://www.thalia.de/suche?sq=Der+Astronaut+Andy+Weir" },
+      ],
+    },
+    {
+      titel: "Leichte Regenjacke",
+      beschreibung: "Zum Wandern und Radfahren, gerne mit Kapuze und Packbeutel.",
+      kategorie: "Kleidung",
+      prioritaet: 2,
+      preis: 90,
+      details: {
+        "Größe": "M",
+        "Farbe": "Dunkelblau oder Schwarz",
+      },
+      links: [
+        { name: "Amazon", url: "https://www.amazon.de/s?k=Regenjacke+Herren+leicht+packbar" },
+      ],
+    },
+    {
+      titel: "Kochkurs",
+      beschreibung: "Am liebsten italienisch oder asiatisch. Egal wo, Hauptsache mit Essen am Ende.",
+      kategorie: "Erlebnisse",
+      prioritaet: 1,
+      details: {
+        "Form": "Gutschein",
+      },
+      hinweis: "Gerne auch zusammen mit dir!",
+    },
+    {
+      titel: "Kaffeebohnen aus einer kleinen Rösterei",
+      beschreibung: "Für den Siebträger zu Hause.",
+      kategorie: "Essen & Trinken",
+      prioritaet: 3,
+      preis: 15,
+      details: {
+        "Röstung": "Espresso",
+        "Menge": "250 g bis 1 kg",
+        "Mahlgrad": "Ganze Bohnen",
+      },
+    },
+    {
+      titel: "Bluetooth-Lautsprecher",
+      kategorie: "Technik",
+      prioritaet: 2,
+      preis: 60,
+      erfuellt: true,
+    },
+  ],
+};
