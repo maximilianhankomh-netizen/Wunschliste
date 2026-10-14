@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Wunschliste bearbeiten</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <!-- Nur eigene Dateien und die GitHub-API erlaubt: zusätzlicher Schutz gegen eingeschleusten Code. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' https: data: blob:; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#2b3fd1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="seite admin">
+    <header class="kopf kopf-klein">
+      <div class="kopf-inhalt">
+        <p class="kopf-label">Admin</p>
+        <h1>Wunschliste bearbeiten</h1>
+        <div class="kopf-aktionen">
+          <a class="knopf knopf-hell knopf-klein" href="./" target="_blank" rel="noopener">Seite ansehen <span aria-hidden="true">↗</span></a>
+          <button type="button" id="abmelden" class="knopf knopf-durchsichtig knopf-klein" hidden>Abmelden</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div id="meldung" class="meldung" role="alert" hidden>
+        <p id="meldung-text"></p>
+        <div class="meldung-aktionen" id="meldung-aktionen"></div>
+      </div>
+
+      <!-- Anmeldung -->
+      <section id="ansicht-login" class="panel" hidden aria-labelledby="login-titel">
+        <h2 id="login-titel">Anmelden</h2>
+        <p>
+          Zum Bearbeiten brauchst du einmalig einen <strong>Admin-Schlüssel</strong> von GitHub.
+          Er erlaubt nur, die Dateien dieser Wunschliste zu ändern.
+        </p>
+        <ol class="schritte">
+          <li>
+            <a id="schluessel-link" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Schlüssel bei GitHub erstellen <span aria-hidden="true">↗</span></a>
+            (du musst bei GitHub angemeldet sein). Name, Ablauf nach einem Jahr und die Berechtigung
+            <em>Contents: Read and write</em> sind schon vorausgefüllt.
+          </li>
+          <li>
+            Bei <em>Repository access</em> „Only select repositories“ wählen und <strong id="repo-name">Wunschliste</strong> auswählen.
+            Das musst du selbst machen.
+          </li>
+          <li>
+            Ganz unten auf <em>Generate token</em> klicken, den Schlüssel kopieren und hier einfügen.
+          </li>
+        </ol>
+        <form id="login-form" class="formular" novalidate>
+          <label class="eingabe" for="schluessel">
+            <span>Admin-Schlüssel</span>
+            <input type="password" id="schluessel" name="schluessel" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" required>
+          </label>
+          <label class="haken" for="merken">
+            <input type="checkbox" id="merken" checked>
+            <span>Auf diesem Gerät angemeldet bleiben</span>
+          </label>
+          <p class="klein">
+            Der Schlüssel wird nur in diesem Browser gespeichert und nur an GitHub gesendet.
+            Auf fremden Geräten den Haken weglassen.
+          </p>
+          <div>
+            <button type="submit" class="knopf knopf-voll" id="login-knopf">Anmelden</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Laden -->
+      <section id="ansicht-laden" class="panel laden" hidden>
+        <p>Wunschliste wird geladen …</p>
+      </section>
+
+      <!-- Übersicht -->
+      <section id="ansicht-liste" hidden aria-labelledby="liste-titel">
+        <div class="admin-leiste">
+          <h2 id="liste-titel">Wünsche <span id="liste-anzahl" class="leise"></span></h2>
+          <button type="button" id="neu" class="knopf knopf-voll">+ Neuer Wunsch</button>
+        </div>
+        <p class="klein leise">
+          Reihenfolge innerhalb gleicher Wichtigkeit = Reihenfolge auf der Seite. Mit den Pfeilen verschiebst du einen Wunsch.
+        </p>
+        <ul id="admin-liste" class="admin-liste"></ul>
+        <p id="liste-leer" class="panel leise" hidden>Noch keine Wünsche. Leg mit „+ Neuer Wunsch“ los!</p>
+        <p id="ohne-titel-hinweis" class="klein leise" hidden></p>
+
+        <details id="einstellungen" class="panel einstellungen">
+          <summary>Einstellungen der Seite</summary>
+          <form id="einstellungen-form" class="formular" novalidate>
+            <label class="eingabe" for="e-titel">
+              <span>Überschrift</span>
+              <input type="text" id="e-titel" maxlength="80">
+            </label>
+            <label class="eingabe" for="e-einleitung">
+              <span>Begrüßungstext</span>
+              <textarea id="e-einleitung" rows="3"></textarea>
+            </label>
+            <label class="eingabe" for="e-amazon">
+              <span>Link zur Amazon-Wunschliste</span>
+              <input type="url" id="e-amazon" inputmode="url" placeholder="https://www.amazon.de/hz/wishlist/ls/…">
+              <small>Leer lassen, wenn du keine hast. Die Liste muss bei Amazon auf „Geteilt“ oder „Öffentlich“ stehen.</small>
+            </label>
+            <fieldset class="gruppe">
+              <legend>Meine Größen</legend>
+              <div id="e-groessen" class="zeilen"></div>
+              <button type="button" class="knopf knopf-rahmen knopf-klein" id="e-groesse-neu">+ Größe hinzufügen</button>
+            </fieldset>
+            <label class="eingabe" for="e-fusszeile">
+              <span>Text ganz unten</span>
+              <textarea id="e-fusszeile" rows="3"></textarea>
+            </label>
+            <div>
+              <button type="submit" class="knopf knopf-voll">Einstellungen speichern</button>
+            </div>
+          </form>
+        </details>
+      </section>
+
+      <!-- Bearbeiten -->
+      <section id="ansicht-editor" hidden aria-labelledby="editor-titel">
+        <div class="admin-leiste">
+          <button type="button" class="knopf knopf-rahmen knopf-klein" id="editor-zurueck">← Zurück</button>
+          <h2 id="editor-titel">Wunsch bearbeiten</h2>
+        </div>
+
+        <form id="editor-form" class="formular panel" novalidate>
+          <label class="eingabe" for="w-titel">
+            <span>Titel <abbr title="Pflichtfeld">*</abbr></span>
+            <input type="text" id="w-titel" required maxlength="120" placeholder="z. B. Kopfhörer mit Noise Cancelling">
+          </label>
+
+          <label class="eingabe" for="w-beschreibung">
+            <span>Beschreibung</span>
+            <textarea id="w-beschreibung" rows="3" placeholder="Was genau und warum?"></textarea>
+          </label>
+
+          <div class="zwei-spalten">
+            <label class="eingabe" for="w-kategorie">
+              <span>Kategorie</span>
+              <input type="text" id="w-kategorie" list="kategorien-liste" maxlength="40" placeholder="z. B. Technik">
+              <datalist id="kategorien-liste"></datalist>
+            </label>
+            <label class="eingabe" for="w-preis">
+              <span>Ungefährer Preis in €</span>
+              <input type="text" id="w-preis" inputmode="decimal" placeholder="z. B. 49,99">
+            </label>
+          </div>
+
+          <fieldset class="gruppe">
+            <legend>Wie wichtig?</legend>
+            <div class="wahl">
+              <label><input type="radio" name="w-prio" value="1"> <span>Herzenswunsch</span></label>
+              <label><input type="radio" name="w-prio" value="2" checked> <span>Würde mich freuen</span></label>
+              <label><input type="radio" name="w-prio" value="3"> <span>Kleinigkeit</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="gruppe">
+            <legend>Bild</legend>
+            <div class="bild-bereich">
+              <div id="w-bild-vorschau" class="bild-vorschau"></div>
+              <div class="bild-knoepfe">
+                <label class="knopf knopf-rahmen knopf-klein datei-knopf" for="w-bild-datei">
+                  Bild auswählen
+                  <input type="file" id="w-bild-datei" accept="image/*">
+                </label>
+                <button type="button" class="knopf knopf-rahmen knopf-klein" id="w-bild-entfernen" hidden>Bild entfernen</button>
+                <details class="bild-url">
+                  <summary>Oder Bild-Adresse einfügen</summary>
+                  <label class="eingabe" for="w-bild-url">
+                    <span class="sr-only">Bild-Adresse</span>
+                    <input type="text" id="w-bild-url" inputmode="url" placeholder="https://… oder bilder/datei.jpg">
+                  </label>
+                </details>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="gruppe">
+            <legend>Details</legend>
+            <p class="klein leise">Zum Beispiel Größe, Farbe, Modell oder ISBN.</p>
+            <div id="w-details" class="zeilen"></div>
+            <button type="button" class="knopf knopf-rahmen knopf-klein" id="w-detail-neu">+ Detail hinzufügen</button>
+          </fieldset>
+
+          <fieldset class="gruppe">
+            <legend>Links zu Shops</legend>
+            <p class="klein leise">Bei Amazon: Auf der Produktseite „Teilen“ → „Link kopieren“ und hier einfügen.</p>
+            <div id="w-links" class="zeilen"></div>
+            <button type="button" class="knopf knopf-rahmen knopf-klein" id="w-link-neu">+ Link hinzufügen</button>
+          </fieldset>
+
+          <label class="eingabe" for="w-hinweis">
+            <span>Persönliche Notiz</span>
+            <input type="text" id="w-hinweis" maxlength="160" placeholder="z. B. Gebraucht ist auch okay!">
+            <small>Erscheint in Handschrift auf der Karte.</small>
+          </label>
+
+          <label class="haken" for="w-erfuellt">
+            <input type="checkbox" id="w-erfuellt">
+            <span>Schon erfüllt (wird dann unten unter „Schon erfüllt“ angezeigt)</span>
+          </label>
+
+          <div id="loeschen-bereich" class="loeschen-bereich">
+            <button type="button" class="knopf knopf-gefahr knopf-klein" id="editor-loeschen">Wunsch löschen</button>
+            <div id="loeschen-frage" class="loeschen-frage" hidden>
+              <p>Diesen Wunsch wirklich löschen?</p>
+              <button type="button" class="knopf knopf-gefahr-voll knopf-klein" id="loeschen-ja">Ja, löschen</button>
+              <button type="button" class="knopf knopf-rahmen knopf-klein" id="loeschen-nein">Nein</button>
+            </div>
+          </div>
+
+          <div class="aktionsleiste">
+            <button type="submit" class="knopf knopf-voll" id="editor-speichern">Speichern</button>
+            <button type="button" class="knopf knopf-rahmen" id="editor-abbrechen">Abbrechen</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div id="hinweis-toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

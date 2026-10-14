@@ -147,8 +147,8 @@ Wunschliste/
 - [x] README mit Schritt-für-Schritt-Anleitung „Neuen Wunsch hinzufügen“
 
 ### Phase 4 – Optional
-- [ ] **Bearbeitungsoberfläche** statt JSON von Hand: z. B. [Pages CMS](https://pagescms.org)
-      (verbindet sich mit dem GitHub-Repo, Formular für jeden Wunsch, Bild-Upload)
+- [x] **Bearbeitungsoberfläche** statt Datei von Hand: eigene Admin-Seite `admin.html`
+      (Anmeldung mit GitHub-Schlüssel, Formulare, Bild-Upload, speichert über die GitHub-API)
 - [ ] **„Ich schenke das“-Reservierung**, damit nichts doppelt geschenkt wird
       (braucht einen kleinen Datenspeicher, z. B. Supabase oder Firebase, kostenlos;
       Reservierungen werden ohne Namen angezeigt, damit die Überraschung bleibt)

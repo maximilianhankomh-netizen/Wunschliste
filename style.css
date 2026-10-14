@@ -188,6 +188,29 @@ a {
   gap: 14px;
 }
 
+.kopf-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.admin-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--kopf-gedaempft);
+  color: var(--kopf-text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.admin-link:hover {
+  background: var(--kopf-punkt);
+}
+
 .kopf-label {
   margin: 0;
   font-size: 0.8rem;
@@ -222,6 +245,13 @@ a {
   font-size: 0.85rem;
   color: var(--kopf-gedaempft);
   max-width: 30rem;
+}
+
+/* Zeilenumbrüche aus der Admin-Seite (Begrüßung, Beschreibung, Fußzeile) anzeigen */
+.einleitung,
+.beschreibung,
+.fusszeile {
+  white-space: pre-line;
 }
 
 /* ---------- Knöpfe ---------- */

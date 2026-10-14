@@ -28,7 +28,10 @@
   <div class="seite">
     <header class="kopf">
       <div class="kopf-inhalt">
-        <p class="kopf-label">Wunschzettel</p>
+        <div class="kopf-zeile">
+          <p class="kopf-label">Wunschzettel</p>
+          <a id="admin-link" class="admin-link" href="admin.html" hidden>Bearbeiten</a>
+        </div>
         <h1 id="titel">Meine Wunschliste</h1>
         <p id="einleitung" class="einleitung"></p>
         <div id="amazon-box" class="amazon-box" hidden>
@@ -97,7 +100,18 @@
 
   <!-- Merkt sich Tippfehler in wuensche.js, damit die Seite die Zeile nennen kann. -->
   <script>window.WL_FEHLER = []; addEventListener("error", function (e) { window.WL_FEHLER.push(e); });</script>
-  <script src="wuensche.js"></script>
-  <script src="app.js"></script>
+  <!-- wuensche.js immer frisch laden (am Cache vorbei), damit Änderungen sofort sichtbar sind; danach app.js. -->
+  <script>
+    (function () {
+      var daten = document.createElement("script");
+      daten.src = "wuensche.js?v=" + Date.now();
+      daten.onload = daten.onerror = function () {
+        var app = document.createElement("script");
+        app.src = "app.js";
+        document.body.appendChild(app);
+      };
+      document.body.appendChild(daten);
+    })();
+  </script>
 </body>
 </html>
