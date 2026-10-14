@@ -90,13 +90,5 @@ window.WUNSCHLISTE = {
         "Mahlgrad": "Ganze Bohnen",
       },
     },
-    {
-      "id": "bluetooth-lautsprecher",
-      "titel": "Bluetooth-Lautsprecher",
-      "kategorie": "Technik",
-      "prioritaet": 2,
-      "preis": 60,
-      "erfuellt": true,
-    },
   ],
 };
