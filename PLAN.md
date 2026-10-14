@@ -152,6 +152,7 @@ Wunschliste/
 - [ ] **„Ich schenke das“-Reservierung**, damit nichts doppelt geschenkt wird
       (braucht einen kleinen Datenspeicher, z. B. Supabase oder Firebase, kostenlos;
       Reservierungen werden ohne Namen angezeigt, damit die Überraschung bleibt)
+- [x] Anzahl pro Wunsch (Feld `anzahl`, Anzeige „3× gewünscht“, Preis pro Stück)
 - [ ] Mehrere Listen (z. B. Geburtstag / Weihnachten) über Feld `anlass`
 - [ ] Eigene Domain
 

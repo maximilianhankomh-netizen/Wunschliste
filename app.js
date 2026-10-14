@@ -55,6 +55,12 @@
     return null;
   }
 
+  // Wie oft etwas gewünscht ist: ganze Zahl ab 1, alles andere zählt als 1.
+  function ganzeAnzahl(wert) {
+    const n = Number(wert);
+    return Number.isInteger(n) && n >= 1 ? Math.min(n, 999) : 1;
+  }
+
   function euro(betrag) {
     return new Intl.NumberFormat("de-DE", {
       style: "currency",
@@ -143,6 +149,7 @@
         kategorie: w.kategorie ? String(w.kategorie) : "",
         prioritaet: prio,
         preis: alsZahl(w.preis),
+        anzahl: ganzeAnzahl(w.anzahl),
         details: w.details && typeof w.details === "object" ? w.details : {},
         bild: w.bild || "",
         links,
@@ -257,7 +264,7 @@
     }
 
     if (w.preis !== null) {
-      const tag = el("p", "preis-tag", "ca. " + euro(w.preis));
+      const tag = el("p", "preis-tag", "ca. " + euro(w.preis) + (w.anzahl > 1 ? " / Stück" : ""));
       bildBox.append(tag);
     }
 
@@ -274,6 +281,7 @@
 
     const meta = el("div", "wunsch-meta");
     meta.append(el("span", "prio prio-" + w.prioritaet, PRIORITAETEN[w.prioritaet]));
+    if (w.anzahl > 1) meta.append(el("span", "anzahl-chip", w.anzahl + "× gewünscht"));
     if (w.kategorie) meta.append(el("span", "kategorie", w.kategorie));
     inhalt.append(meta);
 

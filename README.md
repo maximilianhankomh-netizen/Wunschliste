@@ -53,6 +53,7 @@ https://maximilianhankomh-netizen.github.io/Wunschliste/admin.html) kannst du di
 alles über Formulare bearbeiten:
 
 - Wünsche anlegen, ändern, löschen und als „erfüllt“ markieren
+- Angeben, wie oft du dir etwas wünschst (z. B. 4 Gläser); auf der Karte steht dann „4× gewünscht“
 - Bilder hochladen (werden automatisch verkleinert)
 - Reihenfolge mit Pfeilen ändern
 - Einstellungen: Überschrift, Begrüßung, Amazon-Wunschliste, Größen, Fußzeile
@@ -140,6 +141,12 @@ Nur `titel` ist Pflicht. Alle Felder sind oben in `wuensche.js` erklärt.
 2. Beim Wunsch eintragen: `bild: "bilder/kopfhoerer.jpg",`
 
 Ohne Bild zeigt die Karte automatisch den Anfangsbuchstaben des Wunsches.
+
+### Etwas mehrmals wünschen
+
+Beim Wunsch `anzahl: 4,` ergänzen (oder auf der Admin-Seite „Wie oft wünschst du dir das?“ ausfüllen).
+Die Karte zeigt dann „4× gewünscht“, der Preis gilt pro Stück. Bekommst du einen Teil davon, setz die
+Zahl einfach herunter.
 
 ### Wunsch wurde erfüllt
 
