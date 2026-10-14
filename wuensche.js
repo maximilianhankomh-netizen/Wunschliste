@@ -60,7 +60,6 @@ window.WUNSCHLISTE = {
     "amazonWunschliste": "",
     "groessen": {
       "T-Shirt / Pullover": "M",
-      "Hose": "W32 / L32",
       "Schuhe": "EU 43",
     },
     "fusszeile": "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
