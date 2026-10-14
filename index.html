@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Meine Wunschliste</title>
+
+  <!-- Nicht in Suchmaschinen anzeigen: Nur wer den Link hat, findet die Seite. -->
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Vorschau beim Teilen (WhatsApp, Signal, Telegram …).
+       Wenn die Seite unter einer anderen Adresse liegt, die beiden URLs unten anpassen. -->
+  <meta name="description" content="Alles, worüber ich mich gerade freuen würde, mit Links zum Shop.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Meine Wunschliste">
+  <meta property="og:description" content="Alles, worüber ich mich gerade freuen würde, mit Links zum Shop.">
+  <meta property="og:url" content="https://maximilianhankomh-netizen.github.io/Wunschliste/">
+  <meta property="og:image" content="https://maximilianhankomh-netizen.github.io/Wunschliste/vorschau.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#2b3fd1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="seite">
+    <header class="kopf">
+      <div class="kopf-inhalt">
+        <p class="kopf-label">Wunschzettel</p>
+        <h1 id="titel">Meine Wunschliste</h1>
+        <p id="einleitung" class="einleitung"></p>
+        <div id="amazon-box" class="amazon-box" hidden>
+          <a id="amazon-link" class="knopf knopf-hell" href="#" target="_blank" rel="noopener">
+            Zur Amazon-Wunschliste <span aria-hidden="true">↗</span>
+          </a>
+          <p class="amazon-tipp">
+            Was du dort kaufst, markiert Amazon automatisch als gekauft. So wird nichts doppelt verschenkt.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="werkzeuge" aria-label="Wünsche filtern und sortieren">
+        <div class="kategorien" id="kategorien" role="group" aria-label="Kategorie"></div>
+        <div class="auswahl">
+          <label class="feld">
+            <span>Preis</span>
+            <select id="preis-filter">
+              <option value="alle">Alle Preise</option>
+              <option value="0-25">bis 25 €</option>
+              <option value="25-75">25 bis 75 €</option>
+              <option value="75-150">75 bis 150 €</option>
+              <option value="150-">über 150 €</option>
+            </select>
+          </label>
+          <label class="feld">
+            <span>Sortierung</span>
+            <select id="sortierung">
+              <option value="prioritaet">Wichtigste zuerst</option>
+              <option value="preis-auf">Günstigste zuerst</option>
+              <option value="preis-ab">Teuerste zuerst</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <p id="anzahl" class="anzahl" aria-live="polite"></p>
+
+      <div id="fehler" class="fehler" role="alert" hidden></div>
+
+      <div id="liste" class="liste"></div>
+
+      <div id="leer" class="leer" hidden>
+        <p>In dieser Auswahl gibt es gerade keine Wünsche.</p>
+        <button type="button" id="zuruecksetzen" class="knopf knopf-rahmen">Alle Wünsche zeigen</button>
+      </div>
+
+      <details id="erfuellt" class="erfuellt" hidden>
+        <summary>Schon erfüllt <span id="erfuellt-anzahl"></span></summary>
+        <ul id="erfuellt-liste"></ul>
+      </details>
+    </main>
+
+    <footer class="fuss">
+      <div id="groessen-box" class="groessen-box" hidden>
+        <h2>Meine Größen</h2>
+        <dl id="groessen" class="groessen"></dl>
+      </div>
+      <p id="fusszeile" class="fusszeile"></p>
+    </footer>
+  </div>
+
+  <div id="hinweis-toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Merkt sich Tippfehler in wuensche.js, damit die Seite die Zeile nennen kann. -->
+  <script>window.WL_FEHLER = []; addEventListener("error", function (e) { window.WL_FEHLER.push(e); });</script>
+  <script src="wuensche.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

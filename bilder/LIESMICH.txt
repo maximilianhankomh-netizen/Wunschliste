@@ -1,0 +1,11 @@
+In diesen Ordner kommen die Bilder zu deinen Wünschen.
+
+So geht's:
+1. Bild hochladen (auf GitHub: in diesem Ordner "Add file" -> "Upload files").
+2. Einen einfachen Dateinamen ohne Leerzeichen und Umlaute wählen, z. B. kopfhoerer.jpg
+3. In wuensche.js beim passenden Wunsch eintragen:  bild: "bilder/kopfhoerer.jpg",
+
+Tipps:
+- Am besten ein Produktfoto mit weißem Hintergrund (Rechtsklick auf das Bild im Shop -> "Bild speichern unter").
+- Querformat (z. B. 800 x 600 Pixel) sieht am besten aus. Große Fotos vorher verkleinern.
+- Ohne Bild zeigt die Seite automatisch den Anfangsbuchstaben des Wunsches.
