@@ -61,5 +61,18 @@ window.WUNSCHLISTE = {
     "groessen": {},
     "fusszeile": "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
   },
-  "wuensche": [],
+  "wuensche": [
+    {
+      "id": "test",
+      "titel": "Test",
+      "prioritaet": 2,
+      "preis": 10,
+      "links": [
+        {
+          "name": "Youtube.com",
+          "url": "https://www.youtube.com",
+        },
+      ],
+    },
+  ],
 };
