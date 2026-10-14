@@ -93,6 +93,16 @@
 
   // ---------- Daten prüfen und vorbereiten ----------
 
+  // Auf dem eigenen Gerät (dort ist man auf der Admin-Seite angemeldet) einen Bearbeiten-Knopf zeigen,
+  // auch wenn die Daten einen Fehler haben.
+  try {
+    if (localStorage.getItem("wunschliste-admin") || sessionStorage.getItem("wunschliste-admin")) {
+      $("admin-link").hidden = false;
+    }
+  } catch (e) {
+    // Ohne Speicherzugriff gibt es eben keinen Knopf.
+  }
+
   const daten = window.WUNSCHLISTE;
 
   if (!daten || !Array.isArray(daten.wuensche)) {
@@ -154,15 +164,6 @@
 
     $("einleitung").textContent = einstellungen.einleitung || "";
     $("einleitung").hidden = !einstellungen.einleitung;
-
-    // Auf dem eigenen Gerät (dort ist man auf der Admin-Seite angemeldet) einen Bearbeiten-Knopf zeigen.
-    try {
-      if (localStorage.getItem("wunschliste-admin") || sessionStorage.getItem("wunschliste-admin")) {
-        $("admin-link").hidden = false;
-      }
-    } catch (e) {
-      // Ohne Speicherzugriff gibt es eben keinen Knopf.
-    }
 
     const stand = new Date(document.lastModified);
     if (!isNaN(stand)) {

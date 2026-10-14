@@ -64,6 +64,11 @@
   let speichertGerade = false;
   let reihenfolgeTimer = null;
   let warteschlange = Promise.resolve();
+  let offeneSchreibvorgaenge = 0;
+  let bildVorbereitung = null; // läuft gerade die Verkleinerung eines ausgewählten Fotos?
+  let editorSitzung = 0; // zählt jedes Öffnen/Schließen des Editors
+  let zurueckNachLogin = null; // nach abgelaufenem Schlüssel: wohin nach dem Anmelden
+  let fehlerZaehler = 0;
   const frischeBilder = new Map(); // gerade hochgeladene Bilder (noch nicht veröffentlicht)
 
   const $ = (id) => document.getElementById(id);
@@ -181,11 +186,37 @@
 
   function setzeBeschaeftigt(an, text) {
     speichertGerade = an;
-    for (const id of ["editor-speichern", "loeschen-ja", "neu"]) {
-      $(id).disabled = an;
+    // Während des Speicherns nichts ändern lassen, sonst gingen Eingaben unbemerkt verloren.
+    for (const form of [$("editor-form"), $("einstellungen-form")]) {
+      for (const feld of form.elements) feld.disabled = an;
     }
-    $("einstellungen-form").querySelector("[type=submit]").disabled = an;
+    $("neu").disabled = an;
     if (an) toast(text || "Speichere …", 0);
+  }
+
+  // Fehler direkt am Feld anzeigen (auf dem Handy wäre eine Meldung oben nicht zu sehen).
+  function entferneFeldfehler(form) {
+    for (const f of form.querySelectorAll("[aria-invalid]")) {
+      f.removeAttribute("aria-invalid");
+      f.removeAttribute("aria-describedby");
+    }
+    for (const h of form.querySelectorAll(".feld-fehler")) h.remove();
+  }
+
+  function zeigeFeldfehler(form, fehler) {
+    entferneFeldfehler(form);
+    const erledigt = new Set();
+    for (const [feld, text] of fehler) {
+      feld.setAttribute("aria-invalid", "true");
+      if (erledigt.has(feld)) continue;
+      erledigt.add(feld);
+      const hinweis = el("small", "feld-fehler", text);
+      hinweis.id = "feld-fehler-" + ++fehlerZaehler;
+      feld.setAttribute("aria-describedby", hinweis.id);
+      (feld.closest(".zeile") || feld.closest(".eingabe") || feld).after(hinweis);
+    }
+    fehler[0][0].focus();
+    toast("Bitte prüfe die rot markierten Felder.");
   }
 
   // ---------- GitHub-API ----------
@@ -202,6 +233,7 @@
 
   async function gh(pfad, optionen) {
     const { methode = "GET", body } = optionen || {};
+    if (!token) throw new GitHubFehler(-1, "Abgemeldet");
     const headers = {
       Accept: "application/vnd.github+json",
       Authorization: "Bearer " + token,
@@ -263,8 +295,9 @@
         return "GitHub bremst gerade, weil zu viele Anfragen kamen. Warte ein paar Minuten und versuche es dann noch einmal.";
       }
       return (
-        "Der Admin-Schlüssel darf das nicht. Prüfe bei GitHub, ob er für das Repository „" + KONFIG.repo +
-        "“ die Berechtigung „Contents: Read and write“ hat."
+        "Der Admin-Schlüssel darf die Wunschliste nicht ändern. Prüfe bei GitHub beim Schlüssel: " +
+        "„Repository access“ → „Only select repositories“ → „" + KONFIG.repo + "“ und bei „Permissions“ → " +
+        "„Contents“ → „Read and write“."
       );
     }
     if (f.status === 404) {
@@ -280,9 +313,18 @@
   }
 
   function behandleFehler(f) {
+    if (f instanceof GitHubFehler && f.status === -1) return; // nach dem Abmelden: nichts mehr melden
     if (f instanceof GitHubFehler && f.status === 401) {
-      abmelden(false);
-      meldung(fehlerText(f));
+      // Schlüssel abgelaufen: neu anmelden lassen, aber Eingaben im Editor behalten.
+      const imEditor = aktuelleAnsicht === "editor" && editorStart !== null;
+      zurueckNachLogin = imEditor ? "editor" : null;
+      loescheToken();
+      token = null;
+      zeige("login");
+      meldung(
+        fehlerText(f) +
+          (imEditor ? " Deine Eingaben bleiben erhalten. Nach dem Anmelden kannst du noch einmal speichern." : "")
+      );
       return;
     }
     if (istKonflikt(f)) {
@@ -523,16 +565,22 @@
     const einstellungen =
       roh.einstellungen && typeof roh.einstellungen === "object" ? Object.assign({}, roh.einstellungen) : {};
     const vergeben = new Set();
-    const wuensche = roh.wuensche
-      .filter((w) => w && w.titel)
-      .map((w, index) => {
-        let id = kurzname(w.id || w.titel) || "wunsch-" + (index + 1);
-        const basis = id;
-        for (let n = 2; vergeben.has(id); n++) id = basis + "-" + n;
-        vergeben.add(id);
-        return Object.assign({}, w, { id });
-      });
-    return { einstellungen, wuensche };
+    const wuensche = [];
+    // Einträge ohne Titel zeigt die Seite nicht an. Sie bleiben trotzdem in der Datei erhalten.
+    const ohneTitel = [];
+    for (const w of roh.wuensche) {
+      if (!(w && w.titel)) {
+        ohneTitel.push(w);
+        continue;
+      }
+      // gleiche Regel wie in app.js (Zählung nur über Wünsche mit Titel)
+      let id = kurzname(w.id || w.titel) || "wunsch-" + (wuensche.length + 1);
+      const basis = id;
+      for (let n = 2; vergeben.has(id); n++) id = basis + "-" + n;
+      vergeben.add(id);
+      wuensche.push(Object.assign({ id }, w, { id })); // id zuerst, wie bei neuen Wünschen
+    }
+    return { einstellungen, wuensche, ohneTitel };
   }
 
   function dateiText(d) {
@@ -547,8 +595,11 @@
       },
       e
     );
-    const inhalt = { einstellungen, wuensche: d.wuensche };
-    return (dateiKopf || DATEI_KOPF) + "window.WUNSCHLISTE = " + JSON.stringify(inhalt, null, 2) + ";\n";
+    const inhalt = { einstellungen, wuensche: d.wuensche.concat(d.ohneTitel || []) };
+    // Wie in der Anleitung: hinter jedem Eintrag ein Komma, damit man von Hand gefahrlos Zeilen
+    // ergänzen oder Blöcke kopieren kann. (JSON enthält in Texten nie echte Zeilenumbrüche.)
+    const json = JSON.stringify(inhalt, null, 2).replace(/([^,{[\s])(?=\n\s*[}\]])/g, "$1,");
+    return (dateiKopf || DATEI_KOPF) + "window.WUNSCHLISTE = " + json + ";\n";
   }
 
   // Übernimmt den Kommentar-Kopf der vorhandenen Datei, solange er wirklich nur aus Kommentaren besteht.
@@ -658,9 +709,19 @@
 
   // Schreibvorgänge nacheinander ausführen, nie gleichzeitig.
   function inWarteschlange(aufgabe) {
-    const lauf = warteschlange.then(aufgabe, aufgabe);
+    offeneSchreibvorgaenge++;
+    const lauf = warteschlange.then(aufgabe, aufgabe).finally(() => {
+      offeneSchreibvorgaenge--;
+    });
     warteschlange = lauf.catch(() => {});
     return lauf;
+  }
+
+  function hatUngespeichertes() {
+    return (
+      speichertGerade || offeneSchreibvorgaenge > 0 || reihenfolgeTimer !== null ||
+      editorGeaendert() || einstellungenGeaendert()
+    );
   }
 
   // Daten ändern und speichern. Schlägt das Speichern fehl, wird die Änderung zurückgenommen.
@@ -748,11 +809,14 @@
   // ---------- Werte prüfen ----------
 
   function leseZahl(text) {
+    if (typeof text === "number") return isFinite(text) ? Math.round(text * 100) / 100 : null;
     let t = String(text).replace(/€|eur/gi, "").replace(/\s/g, "");
     if (!t) return undefined;
     if (t.includes(",") && t.includes(".")) {
       // 1.299,99 (deutsch) oder 1,299.99 (englisch)
       t = t.lastIndexOf(",") > t.lastIndexOf(".") ? t.replace(/\./g, "").replace(",", ".") : t.replace(/,/g, "");
+    } else if (/^\d{1,3}(\.\d{3})+$/.test(t)) {
+      t = t.replace(/\./g, ""); // 1.299 = Tausenderpunkt
     } else {
       t = t.replace(",", ".");
     }
@@ -852,7 +916,8 @@
     return box;
   }
 
-  function zeigeListe() {
+  // fokusId: danach diesen Wunsch fokussieren (null = Knopf „Neuer Wunsch“, undefined = Fokus nicht ändern)
+  function zeigeListe(fokusId) {
     const ul = $("admin-liste");
     const liste = daten.wuensche;
     ul.replaceChildren(
@@ -902,7 +967,17 @@
       })
     );
 
+    const ohne = (daten.ohneTitel || []).length;
+    $("ohne-titel-hinweis").hidden = !ohne;
+    $("ohne-titel-hinweis").textContent =
+      "In " + KONFIG.datei + " " + (ohne === 1 ? "steht 1 Eintrag" : "stehen " + ohne + " Einträge") +
+      " ohne Titel. Die Seite zeigt sie nicht an, sie bleiben aber in der Datei erhalten.";
+
     zeige("liste");
+    if (fokusId !== undefined) {
+      const ziel = fokusId && ul.querySelector('.admin-wunsch[data-id="' + CSS.escape(fokusId) + '"] .admin-wunsch-titel');
+      (ziel || $("neu")).focus();
+    }
   }
 
   function verschiebe(id, richtung) {
@@ -912,10 +987,12 @@
     if (i < 0 || j < 0 || j >= liste.length) return;
     [liste[i], liste[j]] = [liste[j], liste[i]];
     zeigeListe();
-    const knopfNeu = document.querySelector(
-      '.admin-wunsch[data-id="' + CSS.escape(id) + '"] .pfeil:nth-child(' + (richtung < 0 ? 1 : 2) + ")"
-    );
-    if (knopfNeu && !knopfNeu.disabled) knopfNeu.focus();
+    // Fokus bleibt beim verschobenen Wunsch, auch wenn er jetzt ganz oben oder unten steht.
+    const zeile = document.querySelector('.admin-wunsch[data-id="' + CSS.escape(id) + '"]');
+    const pfeile = zeile ? [...zeile.querySelectorAll(".pfeil")] : [];
+    const gleicherPfeil = pfeile[richtung < 0 ? 0 : 1];
+    const ziel = gleicherPfeil && !gleicherPfeil.disabled ? gleicherPfeil : pfeile.find((b) => !b.disabled);
+    if (ziel) ziel.focus();
     planeReihenfolge();
   }
 
@@ -1041,9 +1118,17 @@
     $("loeschen-frage").hidden = true;
     $("editor-loeschen").hidden = false;
 
+    editorSitzung++;
+    entferneFeldfehler($("editor-form"));
     zeige("editor");
+    // Eigener Verlaufseintrag: Die Zurück-Geste auf dem Handy führt dann zur Liste statt von der Seite weg.
+    if (!(history.state && history.state.editor)) history.pushState({ editor: true }, "");
     editorStart = JSON.stringify(leseEditor());
     $("w-titel").focus();
+  }
+
+  function verlasseEditorVerlauf() {
+    if (history.state && history.state.editor) history.back();
   }
 
   // Nach dem Neuladen: Felder, die du nicht angefasst hast, auf den aktuellen Stand bringen.
@@ -1067,7 +1152,7 @@
     return true;
   }
 
-  function schliesseEditor(trotzdem) {
+  function schliesseEditor(trotzdem, ausVerlauf) {
     if (!trotzdem && editorGeaendert()) {
       meldung("Du hast Änderungen, die noch nicht gespeichert sind.", {
         aktionen: [
@@ -1079,9 +1164,11 @@
     }
     meldungWeg();
     editorStart = null;
+    editorSitzung++;
     gibBildFrei();
     editorBild = null;
-    zeigeListe();
+    zeigeListe(bearbeiteId);
+    if (!ausVerlauf) verlasseEditorVerlauf();
   }
 
   // Baut aus dem Formular einen sauberen Wunsch. Gibt Fehler mit dem betroffenen Feld zurück.
@@ -1094,10 +1181,14 @@
     if (preis === null) fehler.push([$("w-preis"), "Der Preis muss eine Zahl sein, zum Beispiel 49,99."]);
 
     const details = [];
+    const detailNamen = new Set();
     for (const [k, v, eingabeK, eingabeV] of leseZeilen($("w-details"))) {
       if (!k || !v) {
-        fehler.push([k ? eingabeV : eingabeK, "Bei jedem Detail bitte Bezeichnung und Wert ausfüllen."]);
+        fehler.push([k ? eingabeV : eingabeK, "Bitte Bezeichnung und Wert ausfüllen."]);
+      } else if (detailNamen.has(k.toLowerCase())) {
+        fehler.push([eingabeK, "„" + k + "“ gibt es schon. Schreib beides in eine Zeile, z. B. „Schwarz oder Rot“."]);
       } else {
+        detailNamen.add(k.toLowerCase());
         details.push([k, v]);
       }
     }
@@ -1147,15 +1238,23 @@
   async function speichereEditor(e) {
     e.preventDefault();
     if (speichertGerade) return;
+    if (bildVorbereitung) {
+      // Erst fertig machen, sonst würde das gerade gewählte Foto fehlen.
+      setzeBeschaeftigt(true, "Bild wird noch vorbereitet …");
+      try {
+        await bildVorbereitung;
+      } finally {
+        setzeBeschaeftigt(false);
+        $("hinweis-toast").hidden = true;
+      }
+    }
     meldungWeg();
-    for (const f of $("editor-form").querySelectorAll("[aria-invalid]")) f.removeAttribute("aria-invalid");
+    entferneFeldfehler($("editor-form"));
 
     const alt = bearbeiteId ? daten.wuensche.find((w) => w.id === bearbeiteId) || null : null;
     const { wunsch, fehler } = baueWunsch(alt);
     if (fehler.length) {
-      for (const [feld] of fehler) feld.setAttribute("aria-invalid", "true");
-      meldung(fehler.map(([, text]) => text).filter((t, i, a) => a.indexOf(t) === i).join(" "));
-      fehler[0][0].focus();
+      zeigeFeldfehler($("editor-form"), fehler);
       return;
     }
 
@@ -1185,7 +1284,9 @@
         editorBild = { art: "pfad", wert: wunsch.bild };
       }
       editorStart = null;
-      zeigeListe();
+      editorSitzung++;
+      zeigeListe(wunsch.id);
+      verlasseEditorVerlauf();
       toast("Gespeichert. In 1 bis 2 Minuten ist die Änderung auf der Seite sichtbar.", 6000);
     } catch (f) {
       $("hinweis-toast").hidden = true;
@@ -1209,7 +1310,9 @@
         (d) => unbenutzteBilder([alt.bild], d)
       );
       editorStart = null;
-      zeigeListe();
+      editorSitzung++;
+      zeigeListe(null);
+      verlasseEditorVerlauf();
       toast("„" + alt.titel + "“ wurde gelöscht.", 5000);
     } catch (f) {
       $("hinweis-toast").hidden = true;
@@ -1253,7 +1356,7 @@
     ev.preventDefault();
     if (speichertGerade) return;
     meldungWeg();
-    for (const f of $("einstellungen-form").querySelectorAll("[aria-invalid]")) f.removeAttribute("aria-invalid");
+    entferneFeldfehler($("einstellungen-form"));
 
     const fehler = [];
     let amazon = $("e-amazon").value.trim();
@@ -1263,14 +1366,19 @@
       else amazon = url;
     }
     const groessen = [];
+    const groessenNamen = new Set();
     for (const [k, v, eingabeK, eingabeV] of leseZeilen($("e-groessen"))) {
-      if (!k || !v) fehler.push([k ? eingabeV : eingabeK, "Bei jeder Größe bitte Kleidungsstück und Größe ausfüllen."]);
-      else groessen.push([k, v]);
+      if (!k || !v) {
+        fehler.push([k ? eingabeV : eingabeK, "Bitte Kleidungsstück und Größe ausfüllen."]);
+      } else if (groessenNamen.has(k.toLowerCase())) {
+        fehler.push([eingabeK, "„" + k + "“ steht schon in der Liste."]);
+      } else {
+        groessenNamen.add(k.toLowerCase());
+        groessen.push([k, v]);
+      }
     }
     if (fehler.length) {
-      for (const [feld] of fehler) feld.setAttribute("aria-invalid", "true");
-      meldung(fehler.map(([, t]) => t).filter((t, i, a) => a.indexOf(t) === i).join(" "));
-      fehler[0][0].focus();
+      zeigeFeldfehler($("einstellungen-form"), fehler);
       return;
     }
 
@@ -1358,29 +1466,44 @@
     ev.preventDefault();
     meldungWeg();
     const wert = $("schluessel").value.trim();
+    entferneFeldfehler($("login-form"));
     if (!wert) {
-      $("schluessel").setAttribute("aria-invalid", "true");
-      meldung("Bitte füge deinen Admin-Schlüssel ein.");
-      $("schluessel").focus();
+      zeigeFeldfehler($("login-form"), [[$("schluessel"), "Bitte füge deinen Admin-Schlüssel ein."]]);
       return;
     }
-    if (!/^[A-Za-z0-9_]+$/.test(wert)) {
-      $("schluessel").setAttribute("aria-invalid", "true");
-      meldung("Das sieht nicht nach einem GitHub-Schlüssel aus. Er beginnt meistens mit „github_pat_“ und enthält keine Leerzeichen.");
-      $("schluessel").focus();
+    if (/^(ghp|gho|ghu|ghs)_/.test(wert)) {
+      zeigeFeldfehler($("login-form"), [[
+        $("schluessel"),
+        "Das ist ein klassischer Schlüssel mit Zugriff auf alle deine Repositories. Bitte erstelle über den Link oben einen „Fine-grained“-Schlüssel (beginnt mit „github_pat_“).",
+      ]]);
       return;
     }
-    $("schluessel").removeAttribute("aria-invalid");
+    if (!/^github_pat_[A-Za-z0-9_]+$/.test(wert)) {
+      zeigeFeldfehler($("login-form"), [[
+        $("schluessel"),
+        "Das sieht nicht nach einem passenden Schlüssel aus. Er beginnt mit „github_pat_“ und enthält keine Leerzeichen.",
+      ]]);
+      return;
+    }
     token = wert;
     $("login-knopf").disabled = true;
     zeige("laden");
     try {
       await ladeDaten();
+      await pruefeSchreibrecht();
       speichereToken(wert, $("merken").checked);
       $("schluessel").value = "";
-      fuelleEinstellungen();
-      zeigeListe();
-      toast("Angemeldet.");
+      if (!einstellungenGeaendert()) fuelleEinstellungen();
+      if (zurueckNachLogin === "editor" && editorStart !== null) {
+        zurueckNachLogin = null;
+        zeige("editor");
+        aktualisiereEditorNachNeuladen();
+        meldung("Angemeldet. Deine Eingaben sind noch da. Tippe jetzt noch einmal auf „Speichern“.", { art: "ok" });
+      } else {
+        zurueckNachLogin = null;
+        zeigeListe();
+        toast("Angemeldet.");
+      }
     } catch (f) {
       if (f instanceof DateiFehler) {
         // Der Schlüssel funktioniert, nur die Datei hat einen Tippfehler.
@@ -1398,6 +1521,21 @@
     }
   }
 
+  // Einmal beim Anmelden prüfen, ob der Schlüssel schreiben darf (sonst fiele das erst beim ersten Speichern auf).
+  // Legt dafür nur ein unbenutztes Git-Objekt an; im Repository ändert sich nichts.
+  async function pruefeSchreibrecht() {
+    try {
+      await gh(repoPfad() + "/git/blobs", {
+        methode: "POST",
+        body: { content: "Wunschliste: Test der Schreibrechte\n", encoding: "utf-8" },
+      });
+    } catch (f) {
+      if (f instanceof GitHubFehler && f.status === 404) throw new GitHubFehler(403, "Kein Schreibrecht");
+      if (f instanceof GitHubFehler && f.status === 422) return; // Anfrage kam an, Schreibrecht ist da
+      throw f;
+    }
+  }
+
   function abmelden(mitHinweis) {
     clearTimeout(reihenfolgeTimer);
     reihenfolgeTimer = null;
@@ -1408,6 +1546,8 @@
     zuletztGeschrieben = null;
     editorStart = null;
     einstellungenStart = null;
+    zurueckNachLogin = null;
+    editorSitzung++;
     zeige("login");
     if (mitHinweis) toast("Abgemeldet. Der Schlüssel wurde von diesem Gerät entfernt.");
   }
@@ -1427,7 +1567,7 @@
     }).toString();
   $("login-form").addEventListener("submit", anmelden);
   $("abmelden").addEventListener("click", () => {
-    if (speichertGerade || reihenfolgeTimer || editorGeaendert() || einstellungenGeaendert()) {
+    if (hatUngespeichertes()) {
       meldung("Es gibt noch ungespeicherte Änderungen.", {
         aktionen: [["Trotzdem abmelden", () => abmelden(true), "knopf-gefahr"]],
       });
@@ -1466,18 +1606,28 @@
       meldung("Bitte wähle eine Bilddatei aus, zum Beispiel ein JPG- oder PNG-Bild.");
       return;
     }
+    const sitzung = editorSitzung;
     const box = $("w-bild-vorschau");
     box.classList.add("ohne-bild");
     box.textContent = "Bild wird vorbereitet …";
-    try {
-      const blob = await verkleinereBild(datei);
-      gibBildFrei();
-      editorBild = { art: "neu", blob, url: URL.createObjectURL(blob) };
-      meldungWeg();
-    } catch (e) {
-      meldung("Dieses Bild konnte nicht gelesen werden. Versuche es mit einem JPG- oder PNG-Bild.");
-    }
-    zeigeBildVorschau();
+    const vorbereitung = (async () => {
+      try {
+        const blob = await verkleinereBild(datei);
+        if (sitzung !== editorSitzung) return; // Editor wurde inzwischen geschlossen oder gewechselt
+        gibBildFrei();
+        editorBild = { art: "neu", blob, url: URL.createObjectURL(blob) };
+        meldungWeg();
+      } catch (e) {
+        if (sitzung === editorSitzung) {
+          meldung("Dieses Bild konnte nicht gelesen werden. Versuche es mit einem JPG- oder PNG-Bild.");
+        }
+      } finally {
+        if (sitzung === editorSitzung) zeigeBildVorschau();
+      }
+    })();
+    bildVorbereitung = vorbereitung;
+    await vorbereitung;
+    if (bildVorbereitung === vorbereitung) bildVorbereitung = null;
   });
 
   $("w-bild-entfernen").addEventListener("click", () => {
@@ -1494,8 +1644,18 @@
     $("w-bild-url").closest("details").open = true;
   });
 
+  window.addEventListener("popstate", () => {
+    if (aktuelleAnsicht !== "editor") return;
+    if (speichertGerade || editorGeaendert()) {
+      history.pushState({ editor: true }, "");
+      if (!speichertGerade) schliesseEditor(false);
+      return;
+    }
+    schliesseEditor(true, true);
+  });
+
   window.addEventListener("beforeunload", (ev) => {
-    if (speichertGerade || reihenfolgeTimer || editorGeaendert() || einstellungenGeaendert()) {
+    if (hatUngespeichertes()) {
       ev.preventDefault();
       ev.returnValue = "";
     }

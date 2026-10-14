@@ -6,7 +6,7 @@
   <title>Wunschliste bearbeiten</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <!-- Nur eigene Dateien und die GitHub-API erlaubt: schützt den gespeicherten Admin-Schlüssel. -->
+  <!-- Nur eigene Dateien und die GitHub-API erlaubt: zusätzlicher Schutz gegen eingeschleusten Code. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' https: data: blob:; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#2b3fd1">
@@ -88,6 +88,7 @@
         </p>
         <ul id="admin-liste" class="admin-liste"></ul>
         <p id="liste-leer" class="panel leise" hidden>Noch keine Wünsche. Leg mit „+ Neuer Wunsch“ los!</p>
+        <p id="ohne-titel-hinweis" class="klein leise" hidden></p>
 
         <details id="einstellungen" class="panel einstellungen">
           <summary>Einstellungen der Seite</summary>

@@ -91,6 +91,12 @@ Wichtig:
 - Auf fremden Geräten beim Anmelden den Haken „angemeldet bleiben“ weglassen bzw. danach abmelden.
 - Ist der Schlüssel abgelaufen, meldet die Admin-Seite das. Dann einfach einen neuen erstellen.
 - Verloren oder in falsche Hände geraten? Bei GitHub unter *Fine-grained tokens* den Schlüssel löschen.
+- Nur „Fine-grained“-Schlüssel (beginnen mit `github_pat_`) werden angenommen. Klassische Schlüssel
+  (`ghp_…`) hätten Zugriff auf alle deine Repositories.
+- Alle GitHub-Pages-Seiten deines Kontos teilen sich die Adresse `maximilianhankomh-netizen.github.io`
+  und damit auch den Browser-Speicher. Solange du auf der Admin-Seite angemeldet bleibst, solltest du
+  unter diesem Konto keine weiteren Pages-Seiten mit fremden Skripten (Werbung, Statistik usw.)
+  veröffentlichen. Im Zweifel beim Anmelden den Haken „angemeldet bleiben“ weglassen.
 
 ---
 

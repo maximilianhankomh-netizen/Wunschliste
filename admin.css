@@ -167,6 +167,29 @@
   border-color: var(--herz-text);
 }
 
+/* Fehlermeldung direkt unter dem betroffenen Feld */
+.feld-fehler {
+  display: block;
+  margin-top: -8px;
+  color: var(--herz-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.zeilen .feld-fehler {
+  margin-top: -2px;
+}
+
+/* Hinweise unten: über der Speichern-Leiste und ohne Klicks abzufangen */
+.toast {
+  pointer-events: none;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+.formular input:disabled,
+.formular textarea:disabled {
+  opacity: 0.7;
+}
+
 .zwei-spalten {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));

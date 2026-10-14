@@ -247,6 +247,13 @@ a {
   max-width: 30rem;
 }
 
+/* Zeilenumbrüche aus der Admin-Seite (Begrüßung, Beschreibung, Fußzeile) anzeigen */
+.einleitung,
+.beschreibung,
+.fusszeile {
+  white-space: pre-line;
+}
+
 /* ---------- Knöpfe ---------- */
 
 .knopf {
