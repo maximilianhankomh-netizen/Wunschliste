@@ -57,7 +57,7 @@ window.WUNSCHLISTE = {
   "einstellungen": {
     "titel": "Meine Wunschliste",
     "einleitung": "Schön, dass du vorbeischaust! Hier steht alles, worüber ich mich gerade freuen würde. Die Preise sind ungefähre Richtwerte. Wenn du unsicher bist, frag mich einfach.",
-    "amazonWunschliste": "",
+    "amazonWunschliste": "https://www.amazon.de/hz/wishlist/ls/2LDERB4L73188?ref_=wl_share",
     "groessen": {},
     "fusszeile": "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
   },
