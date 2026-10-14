@@ -67,17 +67,6 @@ window.WUNSCHLISTE = {
   },
   "wuensche": [
     {
-      "id": "kochkurs",
-      "titel": "Kochkurs",
-      "beschreibung": "Am liebsten italienisch oder asiatisch. Egal wo, Hauptsache mit Essen am Ende.",
-      "kategorie": "Erlebnisse",
-      "prioritaet": 1,
-      "details": {
-        "Form": "Gutschein",
-      },
-      "hinweis": "Gerne auch zusammen mit dir!",
-    },
-    {
       "id": "kaffeebohnen-aus-einer-kleinen-roesterei",
       "titel": "Kaffeebohnen aus einer kleinen Rösterei",
       "beschreibung": "Für den Siebträger zu Hause.",
