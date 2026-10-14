@@ -67,24 +67,6 @@ window.WUNSCHLISTE = {
   },
   "wuensche": [
     {
-      "id": "leichte-regenjacke",
-      "titel": "Leichte Regenjacke",
-      "beschreibung": "Zum Wandern und Radfahren, gerne mit Kapuze und Packbeutel.",
-      "kategorie": "Kleidung",
-      "prioritaet": 2,
-      "preis": 90,
-      "details": {
-        "Größe": "M",
-        "Farbe": "Dunkelblau oder Schwarz",
-      },
-      "links": [
-        {
-          "name": "Amazon",
-          "url": "https://www.amazon.de/s?k=Regenjacke+Herren+leicht+packbar",
-        },
-      ],
-    },
-    {
       "id": "kochkurs",
       "titel": "Kochkurs",
       "beschreibung": "Am liebsten italienisch oder asiatisch. Egal wo, Hauptsache mit Essen am Ende.",
