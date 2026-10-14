@@ -54,104 +54,89 @@
 // =====================================================================
 
 window.WUNSCHLISTE = {
-  einstellungen: {
-    titel: "Meine Wunschliste",
-    einleitung:
-      "Schön, dass du vorbeischaust! Hier steht alles, worüber ich mich gerade freuen würde. " +
-      "Die Preise sind ungefähre Richtwerte. Wenn du unsicher bist, frag mich einfach.",
-
-    // Link zu deiner Amazon-Wunschliste. Leer lassen (""), dann wird der Knopf ausgeblendet.
-    // Wichtig: Die Liste muss bei Amazon auf „Geteilt“ oder „Öffentlich“ stehen.
-    amazonWunschliste: "",
-
-    // Größen, damit niemand raten muss. Einträge löschen oder ergänzen, wie du magst.
-    groessen: {
+  "einstellungen": {
+    "titel": "Meine Wunschliste",
+    "einleitung": "Schön, dass du vorbeischaust! Hier steht alles, worüber ich mich gerade freuen würde. Die Preise sind ungefähre Richtwerte. Wenn du unsicher bist, frag mich einfach.",
+    "amazonWunschliste": "",
+    "groessen": {
       "T-Shirt / Pullover": "M",
       "Hose": "W32 / L32",
       "Schuhe": "EU 43",
     },
-
-    // Text ganz unten auf der Seite.
-    fusszeile:
-      "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. " +
-      "Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
+    "fusszeile": "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
   },
-
-  wuensche: [
-    // ---- Die folgenden Wünsche sind BEISPIELE. Ersetze sie durch deine eigenen. ----
+  "wuensche": [
     {
-      titel: "Kopfhörer mit Noise Cancelling",
-      beschreibung: "Over-Ear-Kopfhörer für Bahnfahrten und konzentriertes Arbeiten.",
-      kategorie: "Technik",
-      prioritaet: 1,
-      preis: 299,
-      details: {
-        "Modell": "Sony WH-1000XM5",
-        "Farbe": "Schwarz oder Silber",
-      },
-      links: [
-        { name: "Amazon", url: "https://www.amazon.de/s?k=Sony+WH-1000XM5" },
-        { name: "Hersteller", url: "https://www.sony.de/" },
-      ],
-      hinweis: "Refurbished oder B-Ware ist völlig okay!",
-    },
-    {
-      titel: "Der Astronaut",
-      beschreibung: "Science-Fiction-Roman von Andy Weir, vom Autor von „Der Marsianer“.",
-      kategorie: "Bücher",
-      prioritaet: 2,
-      preis: 14,
-      details: {
+      "id": "der-astronaut",
+      "titel": "Der Astronaut",
+      "beschreibung": "Science-Fiction-Roman von Andy Weir, vom Autor von „Der Marsianer“.",
+      "kategorie": "Bücher",
+      "prioritaet": 2,
+      "preis": 14,
+      "details": {
         "Autor": "Andy Weir",
         "Format": "Taschenbuch, Deutsch",
       },
-      links: [
-        { name: "Amazon", url: "https://www.amazon.de/s?k=Der+Astronaut+Andy+Weir" },
-        { name: "Thalia", url: "https://www.thalia.de/suche?sq=Der+Astronaut+Andy+Weir" },
+      "links": [
+        {
+          "name": "Amazon",
+          "url": "https://www.amazon.de/s?k=Der+Astronaut+Andy+Weir",
+        },
+        {
+          "name": "Thalia",
+          "url": "https://www.thalia.de/suche?sq=Der+Astronaut+Andy+Weir",
+        },
       ],
     },
     {
-      titel: "Leichte Regenjacke",
-      beschreibung: "Zum Wandern und Radfahren, gerne mit Kapuze und Packbeutel.",
-      kategorie: "Kleidung",
-      prioritaet: 2,
-      preis: 90,
-      details: {
+      "id": "leichte-regenjacke",
+      "titel": "Leichte Regenjacke",
+      "beschreibung": "Zum Wandern und Radfahren, gerne mit Kapuze und Packbeutel.",
+      "kategorie": "Kleidung",
+      "prioritaet": 2,
+      "preis": 90,
+      "details": {
         "Größe": "M",
         "Farbe": "Dunkelblau oder Schwarz",
       },
-      links: [
-        { name: "Amazon", url: "https://www.amazon.de/s?k=Regenjacke+Herren+leicht+packbar" },
+      "links": [
+        {
+          "name": "Amazon",
+          "url": "https://www.amazon.de/s?k=Regenjacke+Herren+leicht+packbar",
+        },
       ],
     },
     {
-      titel: "Kochkurs",
-      beschreibung: "Am liebsten italienisch oder asiatisch. Egal wo, Hauptsache mit Essen am Ende.",
-      kategorie: "Erlebnisse",
-      prioritaet: 1,
-      details: {
+      "id": "kochkurs",
+      "titel": "Kochkurs",
+      "beschreibung": "Am liebsten italienisch oder asiatisch. Egal wo, Hauptsache mit Essen am Ende.",
+      "kategorie": "Erlebnisse",
+      "prioritaet": 1,
+      "details": {
         "Form": "Gutschein",
       },
-      hinweis: "Gerne auch zusammen mit dir!",
+      "hinweis": "Gerne auch zusammen mit dir!",
     },
     {
-      titel: "Kaffeebohnen aus einer kleinen Rösterei",
-      beschreibung: "Für den Siebträger zu Hause.",
-      kategorie: "Essen & Trinken",
-      prioritaet: 3,
-      preis: 15,
-      details: {
+      "id": "kaffeebohnen-aus-einer-kleinen-roesterei",
+      "titel": "Kaffeebohnen aus einer kleinen Rösterei",
+      "beschreibung": "Für den Siebträger zu Hause.",
+      "kategorie": "Essen & Trinken",
+      "prioritaet": 3,
+      "preis": 15,
+      "details": {
         "Röstung": "Espresso",
         "Menge": "250 g bis 1 kg",
         "Mahlgrad": "Ganze Bohnen",
       },
     },
     {
-      titel: "Bluetooth-Lautsprecher",
-      kategorie: "Technik",
-      prioritaet: 2,
-      preis: 60,
-      erfuellt: true,
+      "id": "bluetooth-lautsprecher",
+      "titel": "Bluetooth-Lautsprecher",
+      "kategorie": "Technik",
+      "prioritaet": 2,
+      "preis": 60,
+      "erfuellt": true,
     },
   ],
 };
