@@ -31,6 +31,26 @@
 //    erfuellt      true = schon geschenkt bekommen (rutscht nach unten)
 //    id            Optional: Kurzname für Direktlinks (…/#kopfhoerer).
 //                  Fehlt er, wird er automatisch aus dem Titel gebildet.
+//
+// Beispiel Wunschblock:
+/*
+{
+      titel: "Kopfhörer mit Noise Cancelling",
+      beschreibung: "Over-Ear-Kopfhörer für Bahnfahrten und konzentriertes Arbeiten.",
+      kategorie: "Technik",
+      prioritaet: 1,
+      preis: 299,
+      details: {
+        "Modell": "Sony WH-1000XM5",
+        "Farbe": "Schwarz oder Silber",
+      },
+      links: [
+        { name: "Amazon", url: "https://www.amazon.de/s?k=Sony+WH-1000XM5" },
+        { name: "Hersteller", url: "https://www.sony.de/" },
+      ],
+      hinweis: "Refurbished oder B-Ware ist völlig okay!",
+    },
+  */
 // =====================================================================
 
 window.WUNSCHLISTE = {
