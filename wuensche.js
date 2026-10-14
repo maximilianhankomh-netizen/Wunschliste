@@ -67,28 +67,6 @@ window.WUNSCHLISTE = {
   },
   "wuensche": [
     {
-      "id": "der-astronaut",
-      "titel": "Der Astronaut",
-      "beschreibung": "Science-Fiction-Roman von Andy Weir, vom Autor von „Der Marsianer“.",
-      "kategorie": "Bücher",
-      "prioritaet": 2,
-      "preis": 14,
-      "details": {
-        "Autor": "Andy Weir",
-        "Format": "Taschenbuch, Deutsch",
-      },
-      "links": [
-        {
-          "name": "Amazon",
-          "url": "https://www.amazon.de/s?k=Der+Astronaut+Andy+Weir",
-        },
-        {
-          "name": "Thalia",
-          "url": "https://www.thalia.de/suche?sq=Der+Astronaut+Andy+Weir",
-        },
-      ],
-    },
-    {
       "id": "leichte-regenjacke",
       "titel": "Leichte Regenjacke",
       "beschreibung": "Zum Wandern und Radfahren, gerne mit Kapuze und Packbeutel.",
