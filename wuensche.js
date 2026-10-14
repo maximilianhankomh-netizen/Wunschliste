@@ -65,19 +65,5 @@ window.WUNSCHLISTE = {
     },
     "fusszeile": "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
   },
-  "wuensche": [
-    {
-      "id": "kaffeebohnen-aus-einer-kleinen-roesterei",
-      "titel": "Kaffeebohnen aus einer kleinen Rösterei",
-      "beschreibung": "Für den Siebträger zu Hause.",
-      "kategorie": "Essen & Trinken",
-      "prioritaet": 3,
-      "preis": 15,
-      "details": {
-        "Röstung": "Espresso",
-        "Menge": "250 g bis 1 kg",
-        "Mahlgrad": "Ganze Bohnen",
-      },
-    },
-  ],
+  "wuensche": [],
 };
