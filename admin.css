@@ -1,0 +1,544 @@
+/* Zusätzliche Stile für die Admin-Seite. Farben und Schriften kommen aus style.css. */
+
+.kopf-klein {
+  padding-block: clamp(22px, 4vw, 36px);
+}
+.kopf-klein h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+}
+
+.kopf-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.knopf-klein {
+  min-height: 36px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+}
+
+.knopf-durchsichtig {
+  background: transparent;
+  color: var(--kopf-text);
+  border-color: var(--kopf-gedaempft);
+}
+.knopf-durchsichtig:hover {
+  background: var(--kopf-punkt);
+}
+
+.knopf-gefahr {
+  background: transparent;
+  color: var(--herz-text);
+  border-color: var(--linie);
+}
+.knopf-gefahr:hover {
+  border-color: var(--herz-text);
+}
+.knopf-gefahr-voll {
+  background: var(--herz-text);
+  color: var(--karte);
+}
+
+.knopf:disabled,
+.knopf[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.admin-main {
+  padding-top: 40px;
+  display: grid;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--karte);
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.panel > h2 {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+
+.leise {
+  color: var(--grau);
+}
+.klein {
+  font-size: 0.88rem;
+}
+.laden p {
+  margin: 0;
+  color: var(--grau);
+}
+
+/* ---------- Meldungen ---------- */
+
+.meldung {
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  background: var(--herz-bg);
+  color: var(--herz-text);
+  border: 1px solid var(--herz-text);
+  display: grid;
+  gap: 10px;
+}
+.meldung.ok {
+  background: var(--flaeche);
+  color: var(--tinte);
+  border-color: var(--linie);
+}
+.meldung p {
+  margin: 0;
+}
+.meldung-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.meldung-aktionen:empty {
+  display: none;
+}
+
+/* ---------- Anmeldung ---------- */
+
+.schritte {
+  margin: 14px 0 22px;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 8px;
+  max-width: 42rem;
+}
+
+/* ---------- Formulare ---------- */
+
+.formular {
+  display: grid;
+  gap: 18px;
+}
+
+.eingabe {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.eingabe > span {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.eingabe small {
+  color: var(--grau);
+  font-size: 0.82rem;
+}
+.eingabe abbr {
+  text-decoration: none;
+  color: var(--herz-text);
+}
+
+.formular input[type="text"],
+.formular input[type="url"],
+.formular input[type="password"],
+.formular textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--linie);
+  background: var(--papier);
+  color: var(--tinte);
+  font: 400 1rem/1.4 var(--schrift-text);
+}
+.formular textarea {
+  resize: vertical;
+  min-height: 84px;
+}
+.formular input:focus-visible,
+.formular textarea:focus-visible {
+  outline: 3px solid var(--blau);
+  outline-offset: 0;
+  border-color: var(--blau);
+}
+.formular input[aria-invalid="true"] {
+  border-color: var(--herz-text);
+}
+
+.zwei-spalten {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 18px;
+}
+
+.gruppe {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  min-width: 0;
+}
+.gruppe legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.gruppe > p {
+  margin: -4px 0 0;
+}
+.gruppe .zeilen {
+  justify-self: stretch;
+}
+
+.wahl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.wahl label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 14px 6px 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--linie);
+  cursor: pointer;
+}
+.wahl label:has(input:checked) {
+  border-color: var(--blau-text);
+  background: var(--flaeche);
+}
+.wahl input {
+  accent-color: var(--blau);
+  margin: 0;
+}
+
+.haken {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.haken input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--blau);
+  flex: none;
+}
+
+/* Wiederholbare Zeilen (Details, Links, Größen) */
+.zeilen {
+  display: grid;
+  gap: 8px;
+}
+.zeilen:empty {
+  display: none;
+}
+.zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.zeile-entfernen {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--linie);
+  background: var(--karte);
+  color: var(--grau);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.zeile-entfernen:hover {
+  color: var(--herz-text);
+  border-color: var(--herz-text);
+}
+
+/* Bild */
+.bild-bereich {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  justify-self: stretch;
+}
+.bild-vorschau {
+  aspect-ratio: 4 / 3;
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--linie);
+  background: var(--bild-bg);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.bild-vorschau img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+.bild-vorschau.ohne-bild {
+  background: var(--flaeche);
+  color: var(--grau);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 12px;
+}
+.bild-knoepfe {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  min-width: 0;
+}
+.datei-knopf {
+  position: relative;
+}
+.datei-knopf input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  cursor: pointer;
+}
+.datei-knopf:focus-within {
+  outline: 3px solid var(--blau);
+  outline-offset: 2px;
+}
+.bild-url {
+  width: 100%;
+}
+.bild-url summary {
+  cursor: pointer;
+  color: var(--blau-text);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+/* Aktionen unten im Editor */
+.aktionsleiste {
+  position: sticky;
+  bottom: 0;
+  margin-inline: calc(-1 * clamp(18px, 3vw, 28px));
+  margin-bottom: calc(-1 * clamp(18px, 3vw, 28px));
+  padding: 14px clamp(18px, 3vw, 28px) calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--karte);
+  border-top: 1px solid var(--linie);
+  border-radius: 0 0 var(--radius) var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  z-index: 2;
+}
+
+.loeschen-bereich {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linie);
+}
+
+.loeschen-frage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--herz-bg);
+  color: var(--herz-text);
+}
+.loeschen-frage p {
+  margin: 0;
+  font-weight: 600;
+  flex-basis: 100%;
+}
+
+/* ---------- Übersicht ---------- */
+
+.admin-leiste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-leiste h2 {
+  font-size: 1.5rem;
+}
+#ansicht-editor .admin-leiste {
+  justify-content: flex-start;
+  margin-bottom: 14px;
+}
+#ansicht-liste {
+  display: grid;
+  gap: 14px;
+}
+#ansicht-liste[hidden] {
+  display: none;
+}
+#ansicht-liste > p {
+  margin: 0;
+}
+
+.admin-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-wunsch {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 12px 10px 10px;
+  background: var(--karte);
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+}
+.admin-wunsch.ist-erfuellt {
+  opacity: 0.7;
+}
+
+.mini-bild {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bild-bg);
+  border: 1px solid var(--linie);
+  display: grid;
+  place-items: center;
+}
+.mini-bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+.mini-bild.ohne-bild {
+  background: var(--flaeche);
+  font-family: var(--schrift-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--blau-text);
+}
+
+.admin-wunsch-text {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.admin-wunsch-titel {
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--tinte);
+  text-align: left;
+  cursor: pointer;
+}
+.admin-wunsch-titel:hover {
+  color: var(--blau-text);
+  text-decoration: underline;
+}
+.admin-wunsch-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 0.82rem;
+  color: var(--grau);
+  font-variant-numeric: tabular-nums;
+}
+.admin-wunsch-meta .prio {
+  padding: 1px 8px;
+  font-size: 0.78rem;
+}
+.status-erfuellt {
+  font-weight: 600;
+  color: var(--blau-text);
+}
+
+.admin-wunsch-aktionen {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.pfeil {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--linie);
+  background: var(--karte);
+  color: var(--grau);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.pfeil:hover:not(:disabled) {
+  color: var(--blau-text);
+  border-color: var(--blau-text);
+}
+.pfeil:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.einstellungen summary {
+  cursor: pointer;
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.einstellungen[open] summary {
+  margin-bottom: 18px;
+}
+
+/* ---------- Kleine Bildschirme ---------- */
+
+@media (max-width: 560px) {
+  .bild-bereich {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bild-vorschau {
+    max-width: 260px;
+  }
+  .zeile {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .zeile > :nth-child(2) {
+    grid-column: 1;
+  }
+  .zeile > .zeile-entfernen {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .admin-wunsch {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+  .mini-bild {
+    width: 52px;
+    height: 52px;
+  }
+  .admin-wunsch-aktionen {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}

@@ -8,9 +8,11 @@ Links zum Shop bzw. zu Amazon.
 - Filter nach Kategorie und Preis, Sortierung nach Wichtigkeit oder Preis
 - Direktlink zu einzelnen Wünschen (Ketten-Symbol auf jeder Karte)
 - Erscheint nicht bei Google (`noindex`)
+- **Admin-Seite** zum Anlegen, Bearbeiten und Löschen von Wünschen, mit Bild-Upload
 - Keine Datenbank, kein Server, keine Kosten
 
 **Alle Inhalte stehen in einer einzigen Datei: [`wuensche.js`](wuensche.js).**
+Die Admin-Seite ändert genau diese Datei.
 
 ---
 
@@ -44,7 +46,55 @@ Bei beiden Wegen wird die Seite nach jeder Änderung an `main` automatisch neu v
 
 ---
 
-## Wünsche pflegen
+## Wünsche bearbeiten: die Admin-Seite
+
+Unter **`…/Wunschliste/admin.html`** (also z. B.
+https://maximilianhankomh-netizen.github.io/Wunschliste/admin.html) kannst du dich anmelden und
+alles über Formulare bearbeiten:
+
+- Wünsche anlegen, ändern, löschen und als „erfüllt“ markieren
+- Bilder hochladen (werden automatisch verkleinert)
+- Reihenfolge mit Pfeilen ändern
+- Einstellungen: Überschrift, Begrüßung, Amazon-Wunschliste, Größen, Fußzeile
+
+Jedes Speichern wird als ein Commit direkt im GitHub-Repository abgelegt (inklusive Bild). Nach
+1 bis 2 Minuten ist die Änderung auf der Seite sichtbar. Da alles in der Git-Historie liegt, lässt
+sich jede Änderung auf GitHub nachvollziehen und rückgängig machen.
+
+Hinweis: GitHub Pages baut die Seite höchstens etwa 10-mal pro Stunde neu. Wenn du sehr viele
+Änderungen hintereinander machst, kann es etwas länger dauern, bis alles online ist.
+
+### Anmelden (einmal pro Gerät)
+
+Statt eines Passworts benutzt die Admin-Seite einen **Admin-Schlüssel** von GitHub
+(„Fine-grained personal access token“). Er darf nur die Dateien dieses einen Repositorys ändern.
+
+Am einfachsten über den Link auf der Admin-Seite: Er öffnet das GitHub-Formular schon vorausgefüllt
+(Name, Ablauf nach einem Jahr, Berechtigung *Contents: Read and write*). Von Hand geht es so:
+
+1. Bei GitHub anmelden und
+   [einen neuen Schlüssel erstellen](https://github.com/settings/personal-access-tokens/new)
+   (*Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token*).
+2. Name, z. B. *Wunschliste Admin*. Ablaufdatum wählen, z. B. in einem Jahr.
+3. *Repository access*: **Only select repositories** → `Wunschliste`. (Diesen Schritt füllt auch der
+   Link nicht vor.)
+4. *Permissions*: **Contents** hinzufügen → **Read and write**.
+5. **Generate token**, den Schlüssel kopieren und auf der Admin-Seite einfügen.
+
+Der Schlüssel wird nur im Browser dieses Geräts gespeichert und nur an GitHub geschickt. Auf dem
+eigenen Gerät erscheint danach oben auf der Wunschliste ein Knopf **„Bearbeiten“**. Andere Besucher
+sehen ihn nicht.
+
+Wichtig:
+
+- Den Schlüssel wie ein Passwort behandeln und niemandem schicken.
+- Auf fremden Geräten beim Anmelden den Haken „angemeldet bleiben“ weglassen bzw. danach abmelden.
+- Ist der Schlüssel abgelaufen, meldet die Admin-Seite das. Dann einfach einen neuen erstellen.
+- Verloren oder in falsche Hände geraten? Bei GitHub unter *Fine-grained tokens* den Schlüssel löschen.
+
+---
+
+## Von Hand bearbeiten (ohne Admin-Seite)
 
 ### Neuen Wunsch hinzufügen
 
@@ -117,6 +167,7 @@ Fast immer fehlt dort oder eine Zeile davor ein **Komma** oder ein **Anführungs
 | `index.html` | Seitengerüst und Link-Vorschau (Titel/Bild beim Teilen) |
 | `style.css` | Design |
 | `app.js` | Baut die Seite aus `wuensche.js` (muss normalerweise nicht geändert werden) |
+| `admin.html`, `admin.js`, `admin.css` | Admin-Seite zum Bearbeiten. Repository und Branch stehen oben in `admin.js` |
 | `bilder/` | Produktbilder |
 | `vorschau.png` | Vorschaubild beim Teilen in WhatsApp & Co. |
 | `schriften/` | Schriftarten (lokal, keine Verbindung zu Google Fonts nötig) |
