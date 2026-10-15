@@ -534,6 +534,18 @@ main {
   color: var(--grau);
 }
 
+/* „3× gewünscht“ */
+.anzahl-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1.5px solid var(--blau-text);
+  color: var(--blau-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .kategorie {
   color: var(--grau);
   text-transform: uppercase;

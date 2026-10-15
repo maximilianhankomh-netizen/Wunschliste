@@ -141,6 +141,7 @@
 }
 
 .formular input[type="text"],
+.formular input[type="number"],
 .formular input[type="url"],
 .formular input[type="password"],
 .formular textarea {

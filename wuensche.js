@@ -24,6 +24,7 @@
 //    kategorie     z. B. "Technik", "Bücher", "Kleidung", "Erlebnisse"
 //    prioritaet    1 = Herzenswunsch, 2 = würde mich freuen, 3 = Kleinigkeit
 //    preis         Ungefährer Preis in Euro, nur die Zahl (z. B. 24.99)
+//    anzahl        Wie oft du dir das wünschst (z. B. 4). Fehlt es, gilt 1.
 //    details       Zusatzinfos wie Größe, Farbe, Modell, ISBN …
 //    bild          Pfad zu einem Bild im Ordner "bilder", z. B. "bilder/jacke.jpg"
 //    links         Ein oder mehrere Links zu Shops (Amazon, Hersteller …)

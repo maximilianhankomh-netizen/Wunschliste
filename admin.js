@@ -18,7 +18,7 @@
   const API = "https://api.github.com";
   const MAX_BILD_KANTE = 1200;
   const BEKANNTE_FELDER = new Set([
-    "id", "titel", "beschreibung", "kategorie", "prioritaet", "preis",
+    "id", "titel", "beschreibung", "kategorie", "prioritaet", "preis", "anzahl",
     "details", "bild", "links", "hinweis", "erfuellt",
   ]);
 
@@ -41,6 +41,7 @@
 //    kategorie     z. B. "Technik", "Bücher", "Kleidung", "Erlebnisse"
 //    prioritaet    1 = Herzenswunsch, 2 = würde mich freuen, 3 = Kleinigkeit
 //    preis         Ungefährer Preis in Euro, nur die Zahl (z. B. 24.99)
+//    anzahl        Wie oft du dir das wünschst (z. B. 4). Fehlt es, gilt 1.
 //    details       Zusatzinfos wie Größe, Farbe, Modell, ISBN …
 //    bild          Pfad zu einem Bild, z. B. "bilder/jacke.jpg"
 //    links         Ein oder mehrere Links zu Shops: { "name": …, "url": … }
@@ -103,6 +104,12 @@
       .replace(/[̀-ͯ]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
+  }
+
+  // Gleiche Regel wie in app.js: ganze Zahl ab 1, alles andere zählt als 1.
+  function ganzeAnzahl(wert) {
+    const n = Number(wert);
+    return Number.isInteger(n) && n >= 1 ? Math.min(n, 999) : 1;
   }
 
   function euro(betrag) {
@@ -933,6 +940,7 @@
         if (w.kategorie) meta.append(el("span", "", w.kategorie));
         const preis = leseZahl(w.preis === undefined || w.preis === null ? "" : w.preis);
         if (typeof preis === "number") meta.append(el("span", "", "ca. " + euro(preis)));
+        if (ganzeAnzahl(w.anzahl) > 1) meta.append(el("span", "", ganzeAnzahl(w.anzahl) + "× gewünscht"));
         if (w.erfuellt === true) meta.append(el("span", "status-erfuellt", "✓ Erfüllt"));
         text.append(meta);
 
@@ -1021,6 +1029,7 @@
       beschreibung: $("w-beschreibung").value,
       kategorie: $("w-kategorie").value,
       preis: $("w-preis").value,
+      anzahl: $("w-anzahl").value,
       prioritaet: prio ? Number(prio.value) : 2,
       details: leseZeilen($("w-details")).map(([a, b]) => [a, b]),
       links: leseZeilen($("w-links")).map(([a, b]) => [a, b]),
@@ -1065,7 +1074,7 @@
   }
 
   const EDITOR_FELDER = [
-    "titel", "beschreibung", "kategorie", "preis", "prioritaet", "details", "links", "hinweis", "erfuellt", "bild",
+    "titel", "beschreibung", "kategorie", "preis", "anzahl", "prioritaet", "details", "links", "hinweis", "erfuellt", "bild",
   ];
 
   // Füllt das Formular aus einem Wunsch. Mit „felder“ nur diese Felder (sonst alle).
@@ -1075,11 +1084,14 @@
     if (soll("beschreibung")) $("w-beschreibung").value = quelle.beschreibung || "";
     if (soll("kategorie")) $("w-kategorie").value = quelle.kategorie || "";
     if (soll("preis")) {
+      const p = quelle.preis;
       $("w-preis").value =
-        quelle.preis === undefined || quelle.preis === null || quelle.preis === ""
+        p === undefined || p === null || p === ""
           ? ""
-          : String(quelle.preis).replace(".", ",");
+          : // erst wie beim Speichern auf Cent runden, dann zwei Nachkommastellen zeigen
+            (typeof p === "number" && !Number.isInteger(p) ? (Math.round(p * 100) / 100).toFixed(2) : String(p)).replace(".", ",");
     }
+    if (soll("anzahl")) $("w-anzahl").value = String(ganzeAnzahl(quelle.anzahl));
     if (soll("prioritaet")) {
       const prio = [1, 2, 3].includes(Number(quelle.prioritaet)) ? Number(quelle.prioritaet) : 2;
       for (const r of document.querySelectorAll('input[name="w-prio"]')) r.checked = Number(r.value) === prio;
@@ -1180,6 +1192,13 @@
     const preis = leseZahl($("w-preis").value);
     if (preis === null) fehler.push([$("w-preis"), "Der Preis muss eine Zahl sein, zum Beispiel 49,99."]);
 
+    const anzahlText = $("w-anzahl").value.trim();
+    // badInput: Buchstaben o. Ä. im Zahlenfeld (der Browser meldet dann einen leeren Wert)
+    const anzahl = $("w-anzahl").validity.badInput ? NaN : anzahlText === "" ? 1 : Number(anzahlText);
+    if (!Number.isInteger(anzahl) || anzahl < 1 || anzahl > 999) {
+      fehler.push([$("w-anzahl"), "Bitte eine ganze Zahl von 1 bis 999 eingeben."]);
+    }
+
     const details = [];
     const detailNamen = new Set();
     for (const [k, v, eingabeK, eingabeV] of leseZeilen($("w-details"))) {
@@ -1223,6 +1242,7 @@
     if (kategorie) wunsch.kategorie = kategorie;
     wunsch.prioritaet = prio ? Number(prio.value) : 2;
     if (typeof preis === "number") wunsch.preis = preis;
+    if (Number.isInteger(anzahl) && anzahl > 1) wunsch.anzahl = anzahl;
     if (details.length) wunsch.details = Object.fromEntries(details);
     if (bild) wunsch.bild = bild;
     if (links.length) wunsch.links = links;
