@@ -62,5 +62,24 @@ window.WUNSCHLISTE = {
     "groessen": {},
     "fusszeile": "Gutscheine oder ein Zuschuss für einen größeren Wunsch sind genauso willkommen. Und am meisten freue ich mich sowieso über gemeinsame Zeit.",
   },
-  "wuensche": [],
+  "wuensche": [
+    {
+      "id": "biqu-panda-claw-extruder-zahnradsatz-fuer-bambu-x1-p1-a1-serie",
+      "titel": "BIQU Panda Claw Extruder-Zahnradsatz für Bambu X1/P1/A1 Serie",
+      "beschreibung": "ein hochwertiges Extruder-Zahnrad-Upgrade, das speziell für Bambu Lab-Drucker entwickelt wurde",
+      "kategorie": "Technik",
+      "prioritaet": 2,
+      "preis": 24.95,
+      "details": {
+        "Für A1 Serie": "A1",
+      },
+      "bild": "https://biqu.equipment/cdn/shop/files/1-1_6819309d-d2d6-45f9-b9ea-5472699dbb9a.png?v=1757556816&width=610",
+      "links": [
+        {
+          "name": "BIQU",
+          "url": "https://biqu.equipment/de/products/biqu-panda-claw-extruder-gear?variant=41425356750946",
+        },
+      ],
+    },
+  ],
 };
