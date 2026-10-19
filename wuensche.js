@@ -64,6 +64,24 @@ window.WUNSCHLISTE = {
   },
   "wuensche": [
     {
+      "id": "kajplats-led-leuchtmittel-gu10-575-lm",
+      "titel": "KAJPLATS LED-Leuchtmittel GU10 575 lm",
+      "kategorie": "Smart Home",
+      "prioritaet": 2,
+      "preis": 6.99,
+      "anzahl": 6,
+      "details": {
+        "Helligkeit": "575 lm !!!",
+      },
+      "bild": "https://www.ikea.com/de/de/images/products/kajplats-led-leuchtmittel-gu10-575-lm-smart-weissspektrum__1452573_pe991092_s5.jpg?f=xl",
+      "links": [
+        {
+          "name": "IKEA",
+          "url": "https://www.ikea.com/de/de/p/kajplats-led-leuchtmittel-gu10-575-lm-smart-weissspektrum-50611442/",
+        },
+      ],
+    },
+    {
       "id": "kajplats-led-leuchtmittel-e27-1521-lm",
       "titel": "KAJPLATS LED-Leuchtmittel E27 1521 lm",
       "kategorie": "Smart Home",
