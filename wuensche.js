@@ -64,6 +64,24 @@ window.WUNSCHLISTE = {
   },
   "wuensche": [
     {
+      "id": "kajplats-led-leuchtmittel-e27-1521-lm",
+      "titel": "KAJPLATS LED-Leuchtmittel E27 1521 lm",
+      "kategorie": "Smart Home",
+      "prioritaet": 2,
+      "preis": 9.99,
+      "anzahl": 4,
+      "details": {
+        "Helligkeit": "1521 lm !!!",
+      },
+      "bild": "https://www.ikea.com/de/de/images/products/kajplats-led-leuchtmittel-e27-1521-lm-smart-weissspektrum-rund-opalweiss__1452572_pe991091_s5.jpg?f=xl",
+      "links": [
+        {
+          "name": "IKEA",
+          "url": "https://www.ikea.com/de/de/p/kajplats-led-leuchtmittel-e27-1521-lm-smart-weissspektrum-rund-opalweiss-10611302/",
+        },
+      ],
+    },
+    {
       "id": "biqu-panda-claw-extruder-zahnradsatz-fuer-bambu-x1-p1-a1-serie",
       "titel": "BIQU Panda Claw Extruder-Zahnradsatz für Bambu X1/P1/A1 Serie",
       "beschreibung": "ein hochwertiges Extruder-Zahnrad-Upgrade, das speziell für Bambu Lab-Drucker entwickelt wurde",
