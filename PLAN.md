@@ -153,7 +153,8 @@ Wunschliste/
       (braucht einen kleinen Datenspeicher, z. B. Supabase oder Firebase, kostenlos;
       Reservierungen werden ohne Namen angezeigt, damit die Überraschung bleibt)
 - [x] Anzahl pro Wunsch (Feld `anzahl`, Anzeige „3× gewünscht“, Preis pro Stück)
-- [ ] Mehrere Listen (z. B. Geburtstag / Weihnachten) über Feld `anlass`
+- [x] Mehrere Listen, z. B. für weitere Personen: `listen/<name>.js`, Link `…/?liste=<name>`,
+      Auswahl und „Neue Liste“ auf der Admin-Seite
 - [ ] Eigene Domain
 
 ---

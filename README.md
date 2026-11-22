@@ -101,6 +101,41 @@ Wichtig:
 
 ---
 
+## Mehrere Wunschlisten (z. B. für deine Freundin)
+
+Die Seite kann beliebig viele Listen haben. Jede hat ihren eigenen Link, eigene Wünsche, eigene
+Einstellungen (Begrüßung, Amazon-Wunschliste, Größen) und einen eigenen Bilderordner.
+Deine bisherige Liste und ihr Link bleiben unverändert.
+
+### Neue Liste anlegen
+
+1. Admin-Seite öffnen und auf **„+ Neue Liste“** tippen.
+2. Namen eingeben, z. B. *Lena*, und **„Liste anlegen“**. Die Liste heißt dann „Lenas Wunschliste“.
+3. Unten bei **„Einstellungen der Seite“** ihren Amazon-Wunschlisten-Link eintragen.
+4. Oben bei **„Link zum Verschicken“** auf **Kopieren** tippen. Das ist ihr Link, z. B.
+   https://maximilianhankomh-netizen.github.io/Wunschliste/?liste=lena
+
+Mit dem Feld **„Liste“** oben auf der Admin-Seite wechselst du zwischen den Listen.
+
+### Eine zweite Person bearbeitet ihre Liste selbst
+
+Am einfachsten erstellst du für sie einen **zweiten Admin-Schlüssel**:
+
+1. Auf der Admin-Seite (abgemeldet) bzw. bei GitHub einen neuen Schlüssel erstellen, genau wie deinen
+   (siehe „Anmelden“ oben). Nur einen **anderen Namen** wählen, z. B. *Wunschliste Lena*. GitHub
+   erlaubt jeden Namen nur einmal.
+2. Ihr den Schlüssel auf sicherem Weg geben (z. B. persönlich) und dazu den **„Link zum Bearbeiten
+   dieser Liste“** (auf der Admin-Seite unter dem Link zum Verschicken), z. B.
+   `…/Wunschliste/admin.html?liste=lena`.
+3. Sie öffnet den Link auf ihrem Handy und fügt den Schlüssel ein. Ihre Liste öffnet sich direkt und
+   bleibt auf ihrem Gerät gemerkt.
+
+Gut zu wissen: Mit diesem Schlüssel könnte sie über die Listenauswahl auch deine Liste ändern (und du
+ihre). Ihre Änderungen erscheinen auf GitHub unter deinem Namen. Willst du ihr den Zugang wieder
+nehmen, löschst du ihren Schlüssel bei GitHub unter *Fine-grained tokens*.
+
+---
+
 ## Von Hand bearbeiten (ohne Admin-Seite)
 
 ### Neuen Wunsch hinzufügen
@@ -176,7 +211,8 @@ Fast immer fehlt dort oder eine Zeile davor ein **Komma** oder ein **Anführungs
 
 | Datei | Inhalt |
 |---|---|
-| `wuensche.js` | **Alle Inhalte**: Wünsche, Begrüßungstext, Größen, Amazon-Link |
+| `wuensche.js` | **Alle Inhalte deiner Liste**: Wünsche, Begrüßungstext, Größen, Amazon-Link |
+| `listen/` | Weitere Listen, z. B. `listen/lena.js` (zu sehen unter `…/?liste=lena`) |
 | `index.html` | Seitengerüst und Link-Vorschau (Titel/Bild beim Teilen) |
 | `style.css` | Design |
 | `app.js` | Baut die Seite aus `wuensche.js` (muss normalerweise nicht geändert werden) |
