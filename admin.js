@@ -10,11 +10,16 @@
     besitzer: "maximilianhankomh-netizen",
     repo: "Wunschliste",
     branch: "main",
-    datei: "wuensche.js",
+    datei: "wuensche.js", // Hauptliste
+    listenOrdner: "listen", // weitere Listen: listen/<name>.js
     bilderOrdner: "bilder",
   };
 
   const SPEICHER_SCHLUESSEL = "wunschliste-admin";
+  const LISTE_SPEICHER = "wunschliste-admin-liste"; // zuletzt bearbeitete Liste auf diesem Gerät
+  const STANDARD_EINLEITUNG =
+    "Schön, dass du vorbeischaust! Hier steht alles, worüber ich mich gerade freuen würde. " +
+    "Die Preise sind ungefähre Richtwerte. Wenn du unsicher bist, frag mich einfach.";
   const API = "https://api.github.com";
   const MAX_BILD_KANTE = 1200;
   const BEKANNTE_FELDER = new Set([
@@ -59,6 +64,9 @@
   let dateiSha = null;
   let zuletztGeschrieben = null; // Dateitext, wie er zuletzt bei GitHub lag
   let dateiKopf = null; // Kommentare vor „window.WUNSCHLISTE“, bleiben beim Speichern erhalten
+  let listeId = ""; // "" = Hauptliste (wuensche.js), sonst Name der Liste in listen/
+  let listen = []; // alle Listen für die Auswahl: { id, datei, name }
+  let startHinweis = null;
   let bearbeiteId = null; // id des Wunsches im Editor, null = neuer Wunsch
   let editorBild = null; // null | { art: "pfad", wert } | { art: "neu", blob, url }
   let editorStart = null; // Formularstand beim Öffnen, für „ungespeicherte Änderungen“
@@ -194,10 +202,10 @@
   function setzeBeschaeftigt(an, text) {
     speichertGerade = an;
     // Während des Speicherns nichts ändern lassen, sonst gingen Eingaben unbemerkt verloren.
-    for (const form of [$("editor-form"), $("einstellungen-form")]) {
+    for (const form of [$("editor-form"), $("einstellungen-form"), $("neue-liste-form")]) {
       for (const feld of form.elements) feld.disabled = an;
     }
-    $("neu").disabled = an;
+    for (const id of ["neu", "listen-auswahl", "liste-neu"]) $(id).disabled = an;
     if (an) toast(text || "Speichere …", 0);
   }
 
@@ -310,7 +318,7 @@
     if (f.status === 404) {
       return (
         "Nicht gefunden. Entweder hat der Admin-Schlüssel keinen Zugriff auf das Repository „" + repo +
-        "“, oder die Datei " + KONFIG.datei + " liegt noch nicht im Branch „" + KONFIG.branch + "“."
+        "“, oder die Datei " + aktuelleDatei() + " liegt noch nicht im Branch „" + KONFIG.branch + "“."
       );
     }
     if (istKonflikt(f)) {
@@ -344,7 +352,7 @@
     }
     if (f instanceof DateiFehler) {
       const ziel =
-        "https://github.com/" + KONFIG.besitzer + "/" + KONFIG.repo + "/edit/" + KONFIG.branch + "/" + KONFIG.datei;
+        "https://github.com/" + KONFIG.besitzer + "/" + KONFIG.repo + "/edit/" + KONFIG.branch + "/" + (f.datei || aktuelleDatei());
       meldung(
         fehlerText(f) + " Bitte korrigiere das direkt auf GitHub. Danach funktioniert auch die Admin-Seite wieder.",
         {
@@ -365,14 +373,15 @@
   // Sicherheitsgründen kein eval). Versteht alles, was in dieser Datei üblich ist: Kommentare,
   // Objekte, Listen, Texte in "…", '…' und `…`, mit + verbundene Texte, Zahlen, true/false/null,
   // Feldnamen ohne Anführungszeichen und Kommas vor schließenden Klammern.
-  function parseWunschliste(text) {
+  function parseWunschliste(text, dateiname) {
     let i = 0;
     const n = text.length;
 
     function fehler(was, stelle) {
       const zeile = text.slice(0, stelle === undefined ? i : stelle).split("\n").length;
-      const e = new DateiFehler("In " + KONFIG.datei + " ist in Zeile " + zeile + " ein Tippfehler: " + was + ".");
+      const e = new DateiFehler("In " + dateiname + " ist in Zeile " + zeile + " ein Tippfehler: " + was + ".");
       e.zeile = zeile;
+      e.datei = dateiname;
       throw e;
     }
 
@@ -559,11 +568,13 @@
     return ergebnis;
   }
 
-  function leseDatei(text) {
-    const d = parseWunschliste(text);
+  function leseDatei(text, dateiname) {
+    const d = parseWunschliste(text, dateiname);
     if (d === null) return { einstellungen: {}, wuensche: [] };
     if (!d || typeof d !== "object" || !Array.isArray(d.wuensche)) {
-      throw new DateiFehler("In " + KONFIG.datei + " fehlt die Liste „wuensche“.");
+      const e = new DateiFehler("In " + dateiname + " fehlt die Liste „wuensche“.");
+      e.datei = dateiname;
+      throw e;
     }
     return d;
   }
@@ -603,10 +614,14 @@
       e
     );
     const inhalt = { einstellungen, wuensche: d.wuensche.concat(d.ohneTitel || []) };
+    return alsDateiText(dateiKopf || DATEI_KOPF, inhalt);
+  }
+
+  function alsDateiText(kopf, inhalt) {
     // Wie in der Anleitung: hinter jedem Eintrag ein Komma, damit man von Hand gefahrlos Zeilen
     // ergänzen oder Blöcke kopieren kann. (JSON enthält in Texten nie echte Zeilenumbrüche.)
     const json = JSON.stringify(inhalt, null, 2).replace(/([^,{[\s])(?=\n\s*[}\]])/g, "$1,");
-    return (dateiKopf || DATEI_KOPF) + "window.WUNSCHLISTE = " + json + ";\n";
+    return kopf + "window.WUNSCHLISTE = " + json + ";\n";
   }
 
   // Übernimmt den Kommentar-Kopf der vorhandenen Datei, solange er wirklich nur aus Kommentaren besteht.
@@ -619,14 +634,53 @@
     return kopf.replace(/\s*$/, "\n\n");
   }
 
+  // ---------- Mehrere Listen ----------
+  // Hauptliste: wuensche.js, zu sehen unter …/Wunschliste/
+  // Weitere Listen: listen/<name>.js, zu sehen unter …/Wunschliste/?liste=<name>
+
+  function dateiFuerListe(id) {
+    return id ? KONFIG.listenOrdner + "/" + id + ".js" : KONFIG.datei;
+  }
+
+  function aktuelleDatei() {
+    return dateiFuerListe(listeId);
+  }
+
+  // Jede weitere Liste hat ihren eigenen Bilderordner, damit beim Aufräumen nichts vertauscht wird.
+  function bilderOrdnerDerListe() {
+    return listeId ? KONFIG.bilderOrdner + "/" + listeId : KONFIG.bilderOrdner;
+  }
+
+  function istListenName(text) {
+    return /^[a-z0-9-]+$/.test(text);
+  }
+
+  function listenLink(id, zumBearbeiten) {
+    const basis = location.href.split(/[?#]/)[0].replace(/admin\.html$/, "");
+    return basis + (zumBearbeiten ? "admin.html" : "") + (id ? "?liste=" + id : "");
+  }
+
+  function listenName(e, id) {
+    const name = e && (String(e.name || "").trim() || String(e.titel || "").trim());
+    return name || (id ? id.charAt(0).toUpperCase() + id.slice(1) : "Hauptliste");
+  }
+
+  // „Lenas Wunschliste“, „Max’ Wunschliste“
+  function genitiv(name) {
+    return /([sßxz]|ce)$/i.test(name) ? name + "’" : name + "s";
+  }
+
   function repoPfad() {
     return "/repos/" + encodeURIComponent(KONFIG.besitzer) + "/" + encodeURIComponent(KONFIG.repo);
   }
 
   async function ladeDaten() {
-    const antwort = await gh(inhaltPfad(KONFIG.datei) + "?ref=" + encodeURIComponent(KONFIG.branch));
+    const datei = aktuelleDatei();
+    const antwort = await gh(inhaltPfad(datei) + "?ref=" + encodeURIComponent(KONFIG.branch));
     if (!antwort || Array.isArray(antwort) || antwort.type !== "file") {
-      throw new DateiFehler(KONFIG.datei + " ist keine Datei.");
+      const e = new DateiFehler(datei + " ist keine Datei.");
+      e.datei = datei;
+      throw e;
     }
     let text;
     if (antwort.encoding === "base64") {
@@ -636,7 +690,7 @@
       const blob = await gh(repoPfad() + "/git/blobs/" + antwort.sha);
       text = base64ZuUtf8(blob.content || "");
     }
-    daten = normalisiere(leseDatei(text));
+    daten = normalisiere(leseDatei(text, datei));
     dateiKopf = kopfAus(text);
     dateiSha = antwort.sha;
     zuletztGeschrieben = text;
@@ -654,7 +708,9 @@
   // Schreibt alle Dateien eines Speichervorgangs als EINEN Commit (Git-Data-API).
   // So gibt es pro Speichern nur einen Neubau der Seite, und Bild + Liste kommen gemeinsam an.
   // dateien: { pfad, text } | { pfad, base64 } | { pfad, loeschen: true }
-  async function commitDateien(nachricht, dateien) {
+  // pruefung: { datei, sha } – diese Datei muss noch genau diesen Stand haben (sha null = darf es noch nicht geben).
+  async function commitDateien(nachricht, dateien, pruefung) {
+    const soll = pruefung || { datei: aktuelleDatei(), sha: dateiSha };
     const repo = repoPfad();
     const branchRef = "heads/" + encodeURIComponent(KONFIG.branch);
     for (let versuch = 1; ; versuch++) {
@@ -663,9 +719,14 @@
       const basisCommit = await gh(repo + "/git/commits/" + basis);
 
       // Wurde die Liste seit dem Laden woanders geändert? Dann nicht überschreiben.
-      const aktuell = await gh(inhaltPfad(KONFIG.datei) + "?ref=" + basis);
-      if (aktuell.sha !== dateiSha) {
-        throw new GitHubFehler(409, KONFIG.datei + " wurde inzwischen geändert");
+      let istSha = null;
+      try {
+        istSha = (await gh(inhaltPfad(soll.datei) + "?ref=" + basis)).sha;
+      } catch (f) {
+        if (!(f instanceof GitHubFehler && f.status === 404)) throw f;
+      }
+      if (istSha !== soll.sha) {
+        throw new GitHubFehler(409, soll.datei + " wurde inzwischen geändert");
       }
 
       const eintraege = [];
@@ -708,7 +769,7 @@
     const text = dateiText(daten);
     const zusatz = weitere || [];
     if (text === zuletztGeschrieben && !zusatz.length) return;
-    const datei = { pfad: KONFIG.datei, text };
+    const datei = { pfad: aktuelleDatei(), text };
     await commitDateien(nachricht, [datei].concat(zusatz));
     dateiSha = datei.sha;
     zuletztGeschrieben = text;
@@ -747,14 +808,16 @@
   }
 
   function neuerBildPfad(titel) {
-    return KONFIG.bilderOrdner + "/" + (kurzname(titel) || "bild") + "-" + Date.now().toString(36) + ".jpg";
+    return bilderOrdnerDerListe() + "/" + (kurzname(titel) || "bild") + "-" + Date.now().toString(36) + ".jpg";
   }
 
   // Hochgeladene Bilder, die nach der Änderung kein Wunsch mehr benutzt, gleich mit entfernen.
+  // Nur Bilder direkt im Bilderordner dieser Liste (nicht in den Ordnern anderer Listen).
   function unbenutzteBilder(pfade, d) {
+    const ordner = bilderOrdnerDerListe() + "/";
     return pfade
-      .filter((pfad) => typeof pfad === "string" && pfad.startsWith(KONFIG.bilderOrdner + "/"))
-      .filter((pfad) => /\.(jpe?g|png|webp|gif)$/i.test(pfad))
+      .filter((pfad) => typeof pfad === "string" && pfad.startsWith(ordner))
+      .filter((pfad) => /^[^/]+\.(jpe?g|png|webp|gif)$/i.test(pfad.slice(ordner.length)))
       .filter((pfad) => !d.wuensche.some((w) => w.bild === pfad))
       .map((pfad) => ({ pfad, loeschen: true }));
   }
@@ -978,9 +1041,10 @@
     const ohne = (daten.ohneTitel || []).length;
     $("ohne-titel-hinweis").hidden = !ohne;
     $("ohne-titel-hinweis").textContent =
-      "In " + KONFIG.datei + " " + (ohne === 1 ? "steht 1 Eintrag" : "stehen " + ohne + " Einträge") +
+      "In " + aktuelleDatei() + " " + (ohne === 1 ? "steht 1 Eintrag" : "stehen " + ohne + " Einträge") +
       " ohne Titel. Die Seite zeigt sie nicht an, sie bleiben aber in der Datei erhalten.";
 
+    zeigeListenAuswahl();
     zeige("liste");
     if (fokusId !== undefined) {
       const ziel = fokusId && ul.querySelector('.admin-wunsch[data-id="' + CSS.escape(fokusId) + '"] .admin-wunsch-titel');
@@ -1348,6 +1412,7 @@
 
   function leseEinstellungenFormular() {
     return {
+      name: $("e-name").value,
       titel: $("e-titel").value,
       einleitung: $("e-einleitung").value,
       amazonWunschliste: $("e-amazon").value,
@@ -1362,6 +1427,7 @@
 
   function fuelleEinstellungen() {
     const e = daten.einstellungen;
+    $("e-name").value = e.name || "";
     $("e-titel").value = e.titel || "";
     $("e-einleitung").value = e.einleitung || "";
     $("e-amazon").value = e.amazonWunschliste || "";
@@ -1403,6 +1469,7 @@
     }
 
     const alle = {
+      name: $("e-name").value.trim(),
       titel: $("e-titel").value.trim(),
       einleitung: $("e-einleitung").value.trim(),
       amazonWunschliste: amazon,
@@ -1428,6 +1495,9 @@
         d.einstellungen = Object.assign({}, d.einstellungen, neu);
       }, "Einstellungen der Wunschliste geändert");
       fuelleEinstellungen();
+      const eintrag = listen.find((l) => l.id === listeId);
+      if (eintrag) eintrag.name = listenName(daten.einstellungen, listeId);
+      zeigeListenAuswahl();
       toast("Einstellungen gespeichert. In 1 bis 2 Minuten sind sie auf der Seite sichtbar.", 6000);
     } catch (f) {
       $("hinweis-toast").hidden = true;
@@ -1436,6 +1506,199 @@
       if (daten && aktuelleAnsicht === "liste") zeigeListe();
     } finally {
       setzeBeschaeftigt(false);
+    }
+  }
+
+  // ---------- Listen: finden, wechseln, neu anlegen ----------
+
+  // Findet alle Listen (Hauptliste + jede Datei in listen/) und ihre Namen für die Auswahl.
+  // Fehler sind hier nicht schlimm: Dann zeigt die Auswahl eben nur die bekannten Listen.
+  async function ladeListen() {
+    const gefunden = [{ id: "", datei: KONFIG.datei }];
+    try {
+      const eintraege = await gh(inhaltPfad(KONFIG.listenOrdner) + "?ref=" + encodeURIComponent(KONFIG.branch));
+      for (const e of Array.isArray(eintraege) ? eintraege : []) {
+        const m = /^([a-z0-9-]+)\.js$/.exec(e.name || "");
+        if (e.type === "file" && m) gefunden.push({ id: m[1], datei: dateiFuerListe(m[1]) });
+      }
+    } catch (f) {
+      // 404: Es gibt noch keine weiteren Listen.
+    }
+    if (!gefunden.some((l) => l.id === listeId)) gefunden.push({ id: listeId, datei: aktuelleDatei() });
+    await Promise.all(
+      gefunden.map(async (l) => {
+        if (l.id === listeId) {
+          l.name = listenName(daten && daten.einstellungen, l.id);
+          return;
+        }
+        try {
+          const a = await gh(inhaltPfad(l.datei) + "?ref=" + encodeURIComponent(KONFIG.branch));
+          const d = parseWunschliste(base64ZuUtf8(a.content || ""), l.datei);
+          l.name = listenName(d && d.einstellungen, l.id);
+        } catch (f) {
+          l.name = listenName(null, l.id);
+        }
+      })
+    );
+    listen = gefunden;
+    zeigeListenAuswahl();
+  }
+
+  function zeigeListenAuswahl() {
+    const bekannt = listen.length ? listen : [{ id: listeId, name: listenName(daten && daten.einstellungen, listeId) }];
+    $("listen-auswahl").replaceChildren(
+      ...bekannt.map((l) => {
+        const o = el("option", "", l.name + (l.id ? "" : " (Hauptliste)"));
+        o.value = l.id;
+        return o;
+      })
+    );
+    $("listen-auswahl").value = listeId;
+    $("teilen-link").value = listenLink(listeId, false);
+    $("teilen-admin-link").value = listenLink(listeId, true);
+    $("seite-ansehen").href = "./" + (listeId ? "?liste=" + listeId : "");
+  }
+
+  // Merkt sich die Liste auf diesem Gerät und schreibt sie in die Adresse (zum Neuladen/Lesezeichen).
+  function merkeListe() {
+    try {
+      localStorage.setItem(LISTE_SPEICHER, listeId);
+    } catch (e) {
+      // ohne Speicher eben nicht
+    }
+    history.replaceState(history.state, "", listenLink(listeId, true));
+  }
+
+  // Liste beim Start: aus der Adresse (…/admin.html?liste=lena), sonst die zuletzt bearbeitete.
+  function startListe() {
+    const treffer = /[?&]liste=([^&#]*)/.exec(location.search);
+    let id = "";
+    try {
+      id = treffer ? decodeURIComponent(treffer[1]) : localStorage.getItem(LISTE_SPEICHER) || "";
+    } catch (e) {
+      id = "";
+    }
+    id = String(id).trim().toLowerCase();
+    return istListenName(id) ? id : "";
+  }
+
+  // Lädt die gewählte Liste. Gibt es sie nicht (mehr), wird die Hauptliste geöffnet.
+  async function ladeStartListe() {
+    try {
+      await ladeDaten();
+    } catch (f) {
+      if (!listeId || !(f instanceof GitHubFehler && f.status === 404)) throw f;
+      const fehlt = listeId;
+      listeId = "";
+      await ladeDaten();
+      startHinweis = "Die Liste „" + fehlt + "“ gibt es nicht. Die Hauptliste ist geöffnet.";
+    }
+    merkeListe();
+  }
+
+  async function wechsleListe(id, hinweis) {
+    if (id === listeId) return;
+    if (hatUngespeichertes()) {
+      $("listen-auswahl").value = listeId;
+      meldung("Speichere zuerst deine Änderungen (oder verwirf sie), bevor du die Liste wechselst.");
+      return;
+    }
+    meldungWeg();
+    const vorher = listeId;
+    listeId = id;
+    zeige("laden");
+    try {
+      await inWarteschlange(ladeDaten);
+    } catch (f) {
+      listeId = vorher; // die bisherige Liste ist noch geladen
+      zeigeListenAuswahl();
+      zeigeListe();
+      behandleFehler(f);
+      return;
+    }
+    merkeListe();
+    fuelleEinstellungen();
+    zeigeListenAuswahl();
+    zeigeListe(null);
+    if (hinweis) toast(hinweis, 6000);
+  }
+
+  function zeigeNeueListeVorschau() {
+    const id = kurzname($("neue-liste-name").value);
+    $("neue-liste-vorschau").textContent = "Daraus wird der Link …/?liste=" + (id || "…");
+  }
+
+  async function legeListeAn(ev) {
+    ev.preventDefault();
+    if (speichertGerade) return;
+    const form = $("neue-liste-form");
+    entferneFeldfehler(form);
+    meldungWeg();
+    const name = $("neue-liste-name").value.trim();
+    const id = kurzname(name);
+    if (!name || !id) {
+      zeigeFeldfehler(form, [[$("neue-liste-name"), "Bitte gib einen Namen ein, zum Beispiel Lena."]]);
+      return;
+    }
+    if (listen.some((l) => l.id === id)) {
+      zeigeFeldfehler(form, [[$("neue-liste-name"), "Eine Liste mit dem Link „?liste=" + id + "“ gibt es schon."]]);
+      return;
+    }
+    if (hatUngespeichertes()) {
+      meldung("Speichere zuerst deine Änderungen (oder verwirf sie), bevor du eine neue Liste anlegst.");
+      return;
+    }
+    const datei = dateiFuerListe(id);
+    const inhalt = {
+      einstellungen: {
+        name,
+        titel: genitiv(name) + " Wunschliste",
+        einleitung: STANDARD_EINLEITUNG,
+        amazonWunschliste: "",
+        groessen: {},
+        fusszeile: "",
+      },
+      wuensche: [],
+    };
+    setzeBeschaeftigt(true, "Lege Liste an …");
+    try {
+      await inWarteschlange(() =>
+        commitDateien(
+          "Neue Wunschliste „" + name + "“ angelegt",
+          [{ pfad: datei, text: alsDateiText(DATEI_KOPF, inhalt) }],
+          { datei, sha: null }
+        )
+      );
+    } catch (f) {
+      setzeBeschaeftigt(false);
+      $("hinweis-toast").hidden = true;
+      if (istKonflikt(f)) {
+        zeigeFeldfehler(form, [[$("neue-liste-name"), "Eine Liste mit diesem Namen gibt es schon."]]);
+        ladeListen();
+      } else {
+        behandleFehler(f);
+      }
+      return;
+    }
+    setzeBeschaeftigt(false);
+    form.hidden = true;
+    $("neue-liste-name").value = "";
+    zeigeNeueListeVorschau();
+    listen.push({ id, datei, name });
+    await wechsleListe(id, "Liste „" + name + "“ angelegt. Trag jetzt den Amazon-Link in den Einstellungen ein.");
+  }
+
+  function kopiere(eingabe) {
+    const fertig = () => toast("Link kopiert.");
+    const markieren = () => {
+      eingabe.focus();
+      eingabe.select();
+      toast("Link markiert. Jetzt kopieren.");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(eingabe.value).then(fertig, markieren);
+    } else {
+      markieren();
     }
   }
 
@@ -1461,12 +1724,21 @@
     }
   }
 
+  async function nachDemLaden() {
+    await ladeListen();
+    if (startHinweis) {
+      meldung(startHinweis, { art: "ok" });
+      startHinweis = null;
+    }
+  }
+
   async function starteMitToken() {
     zeige("laden");
     try {
-      await ladeDaten();
+      await ladeStartListe();
       fuelleEinstellungen();
       zeigeListe();
+      await nachDemLaden();
     } catch (f) {
       if (f instanceof DateiFehler) {
         zeige("keine");
@@ -1509,7 +1781,7 @@
     $("login-knopf").disabled = true;
     zeige("laden");
     try {
-      await ladeDaten();
+      await ladeStartListe();
       await pruefeSchreibrecht();
       speichereToken(wert, $("merken").checked);
       $("schluessel").value = "";
@@ -1524,6 +1796,7 @@
         zeigeListe();
         toast("Angemeldet.");
       }
+      await nachDemLaden();
     } catch (f) {
       if (f instanceof DateiFehler) {
         // Der Schlüssel funktioniert, nur die Datei hat einen Tippfehler.
@@ -1598,6 +1871,21 @@
   });
 
   $("neu").addEventListener("click", () => oeffneEditor(null));
+  $("listen-auswahl").addEventListener("change", (ev) => wechsleListe(ev.target.value));
+  $("liste-neu").addEventListener("click", () => {
+    $("neue-liste-form").hidden = false;
+    $("neue-liste-name").focus();
+  });
+  $("neue-liste-abbrechen").addEventListener("click", () => {
+    entferneFeldfehler($("neue-liste-form"));
+    $("neue-liste-form").hidden = true;
+    $("liste-neu").focus();
+  });
+  $("neue-liste-name").addEventListener("input", zeigeNeueListeVorschau);
+  $("neue-liste-form").addEventListener("submit", legeListeAn);
+  for (const b of document.querySelectorAll("[data-kopieren]")) {
+    b.addEventListener("click", () => kopiere($(b.dataset.kopieren)));
+  }
   $("editor-form").addEventListener("submit", speichereEditor);
   $("editor-zurueck").addEventListener("click", () => schliesseEditor(false));
   $("editor-abbrechen").addEventListener("click", () => schliesseEditor(false));
@@ -1681,6 +1969,7 @@
     }
   });
 
+  listeId = startListe();
   token = ladeToken();
   if (token) {
     starteMitToken();

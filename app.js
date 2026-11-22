@@ -101,8 +101,13 @@
 
   // Auf dem eigenen Gerät (dort ist man auf der Admin-Seite angemeldet) einen Bearbeiten-Knopf zeigen,
   // auch wenn die Daten einen Fehler haben.
+  // Welche Liste diese Seite zeigt (…/?liste=lena), siehe index.html.
+  const liste = window.WL_LISTE || "";
+  const datei = window.WL_DATEI || "wuensche.js";
+
   try {
     if (localStorage.getItem("wunschliste-admin") || sessionStorage.getItem("wunschliste-admin")) {
+      $("admin-link").href = "admin.html" + (liste ? "?liste=" + encodeURIComponent(liste) : "");
       $("admin-link").hidden = false;
     }
   } catch (e) {
@@ -112,16 +117,25 @@
   const daten = window.WUNSCHLISTE;
 
   if (!daten || !Array.isArray(daten.wuensche)) {
-    const fehler = (window.WL_FEHLER || []).find((e) => /wuensche\.js/.test(e.filename || ""));
+    $("anzahl").hidden = true;
+    if (window.WL_LADEFEHLER) {
+      zeigeFehler(
+        liste ? "Diese Wunschliste gibt es nicht." : "Die Wünsche konnten nicht geladen werden.",
+        liste
+          ? "Prüfe den Link. Vielleicht fehlt ein Buchstabe oder die Liste wurde umbenannt."
+          : "Prüfe deine Internetverbindung und lade die Seite neu."
+      );
+      return;
+    }
+    const fehler = (window.WL_FEHLER || []).find((e) => (e.filename || "").split("?")[0].endsWith("/" + datei));
     zeigeFehler(
       "Die Wünsche konnten nicht geladen werden.",
       fehler && fehler.lineno
-        ? `In der Datei wuensche.js ist in oder kurz vor Zeile ${fehler.lineno} ein Tippfehler. ` +
+        ? `In der Datei ${datei} ist in oder kurz vor Zeile ${fehler.lineno} ein Tippfehler. ` +
             "Meistens fehlt ein Komma oder ein Anführungszeichen."
-        : "Wahrscheinlich ist in der Datei wuensche.js ein Tippfehler. " +
+        : `Wahrscheinlich ist in der Datei ${datei} ein Tippfehler. ` +
             "Meistens fehlt ein Komma oder ein Anführungszeichen in der zuletzt geänderten Zeile."
     );
-    $("anzahl").hidden = true;
     return;
   }
 

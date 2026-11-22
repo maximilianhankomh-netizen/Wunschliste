@@ -100,16 +100,31 @@
 
   <!-- Merkt sich Tippfehler in wuensche.js, damit die Seite die Zeile nennen kann. -->
   <script>window.WL_FEHLER = []; addEventListener("error", function (e) { window.WL_FEHLER.push(e); });</script>
-  <!-- wuensche.js immer frisch laden (am Cache vorbei), damit Änderungen sofort sichtbar sind; danach app.js. -->
+  <!-- Welche Liste? Ohne Angabe die Hauptliste (wuensche.js), mit …/?liste=lena die Datei listen/lena.js.
+       Die Daten werden immer frisch geladen (am Cache vorbei), damit Änderungen sofort sichtbar sind; danach app.js. -->
   <script>
     (function () {
-      var daten = document.createElement("script");
-      daten.src = "wuensche.js?v=" + Date.now();
-      daten.onload = daten.onerror = function () {
+      var treffer = /[?&]liste=([^&#]*)/.exec(location.search);
+      var liste = "";
+      try {
+        liste = treffer ? decodeURIComponent(treffer[1]).replace(/^\s+|\s+$/g, "").toLowerCase() : "";
+      } catch (e) {
+        liste = treffer[1];
+      }
+      window.WL_LISTE = liste;
+      window.WL_DATEI = liste ? "listen/" + liste + ".js" : "wuensche.js";
+
+      function weiter(ladefehler) {
+        if (ladefehler) window.WL_LADEFEHLER = true;
         var app = document.createElement("script");
         app.src = "app.js";
         document.body.appendChild(app);
-      };
+      }
+      if (liste && !/^[a-z0-9-]+$/.test(liste)) return weiter(true);
+      var daten = document.createElement("script");
+      daten.src = window.WL_DATEI + "?v=" + Date.now();
+      daten.onload = function () { weiter(false); };
+      daten.onerror = function () { weiter(true); };
       document.body.appendChild(daten);
     })();
   </script>

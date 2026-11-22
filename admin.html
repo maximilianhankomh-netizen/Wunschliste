@@ -20,7 +20,7 @@
         <p class="kopf-label">Admin</p>
         <h1>Wunschliste bearbeiten</h1>
         <div class="kopf-aktionen">
-          <a class="knopf knopf-hell knopf-klein" href="./" target="_blank" rel="noopener">Seite ansehen <span aria-hidden="true">↗</span></a>
+          <a id="seite-ansehen" class="knopf knopf-hell knopf-klein" href="./" target="_blank" rel="noopener">Seite ansehen <span aria-hidden="true">↗</span></a>
           <button type="button" id="abmelden" class="knopf knopf-durchsichtig knopf-klein" hidden>Abmelden</button>
         </div>
       </div>
@@ -79,6 +79,52 @@
 
       <!-- Übersicht -->
       <section id="ansicht-liste" hidden aria-labelledby="liste-titel">
+        <!-- Welche Liste wird bearbeitet, und unter welchem Link ist sie zu finden? -->
+        <div class="panel formular listen-panel">
+          <div class="listen-zeile">
+            <label class="eingabe" for="listen-auswahl">
+              <span>Liste</span>
+              <select id="listen-auswahl"></select>
+            </label>
+            <button type="button" id="liste-neu" class="knopf knopf-rahmen knopf-klein">+ Neue Liste</button>
+          </div>
+          <div class="eingabe">
+            <label for="teilen-link"><span>Link zum Verschicken</span></label>
+            <div class="kopier-zeile">
+              <input type="text" id="teilen-link" readonly>
+              <button type="button" class="knopf knopf-rahmen knopf-klein" data-kopieren="teilen-link">Kopieren</button>
+            </div>
+          </div>
+          <details class="admin-link-details">
+            <summary>Link zum Bearbeiten dieser Liste</summary>
+            <p class="klein leise">
+              Für die Person, der die Liste gehört. Zum Anmelden braucht sie einen eigenen Admin-Schlüssel
+              (siehe README: „Eine zweite Person bearbeitet ihre Liste“).
+            </p>
+            <div class="kopier-zeile">
+              <input type="text" id="teilen-admin-link" readonly aria-label="Link zum Bearbeiten dieser Liste">
+              <button type="button" class="knopf knopf-rahmen knopf-klein" data-kopieren="teilen-admin-link">Kopieren</button>
+            </div>
+          </details>
+        </div>
+
+        <form id="neue-liste-form" class="panel formular" hidden novalidate aria-labelledby="neue-liste-titel">
+          <h2 id="neue-liste-titel">Neue Wunschliste</h2>
+          <p class="klein leise">
+            Zum Beispiel für deine Freundin. Die Liste bekommt einen eigenen Link und eigene Einstellungen
+            (Begrüßung, Amazon-Wunschliste, Größen). Deine Liste bleibt unverändert.
+          </p>
+          <label class="eingabe" for="neue-liste-name">
+            <span>Name</span>
+            <input type="text" id="neue-liste-name" maxlength="40" placeholder="z. B. Lena" autocomplete="off">
+            <small id="neue-liste-vorschau">Daraus wird der Link …/?liste=…</small>
+          </label>
+          <div class="knopf-reihe">
+            <button type="submit" class="knopf knopf-voll">Liste anlegen</button>
+            <button type="button" id="neue-liste-abbrechen" class="knopf knopf-rahmen">Abbrechen</button>
+          </div>
+        </form>
+
         <div class="admin-leiste">
           <h2 id="liste-titel">Wünsche <span id="liste-anzahl" class="leise"></span></h2>
           <button type="button" id="neu" class="knopf knopf-voll">+ Neuer Wunsch</button>
@@ -93,6 +139,11 @@
         <details id="einstellungen" class="panel einstellungen">
           <summary>Einstellungen der Seite</summary>
           <form id="einstellungen-form" class="formular" novalidate>
+            <label class="eingabe" for="e-name">
+              <span>Name</span>
+              <input type="text" id="e-name" maxlength="40" placeholder="z. B. Max">
+              <small>Erscheint nur hier in der Listenauswahl.</small>
+            </label>
             <label class="eingabe" for="e-titel">
               <span>Überschrift</span>
               <input type="text" id="e-titel" maxlength="80">
